@@ -6,6 +6,7 @@ public class PetalsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         this.getLogger().info("Hello, World!");
+        this.getLogger().info(Petals.getSomething());
     }
 }
 

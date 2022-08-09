@@ -1,0 +1,7 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'io.github.petals'
+version = '0.1'
+
