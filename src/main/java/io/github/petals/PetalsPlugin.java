@@ -8,12 +8,16 @@ import io.github.petals.structures.PetalsGame;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsPlugin extends Petals {
-    // TODO: Initialize this
     private JedisPooled pooled;
 
     @Override
     public void onEnable() {
-        this.getLogger().info("Hello, World!");
+        this.saveDefaultConfig();
+
+        // Connect to database
+        final String host = this.getConfig().getString("redis.host", "127.0.0.1");
+        final short port = (short) this.getConfig().getInt("redis.port", 6379);
+        this.pooled = new JedisPooled(host, port);
     }
 
     @Override
