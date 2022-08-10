@@ -35,9 +35,20 @@ public class PetalsPlugin extends Petals {
     }
 
     @Override
+    public void onDisable() {
+        this.games().forEach(game -> game.delete());
+    }
+
+    @Override
     public Set<Game> games() {
         Set<String> gameIds = pooled.smembers("games");
         return gameIds.stream().map(id -> new PetalsGame(UUID.fromString(id), pooled)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Player> players() {
+        Set<String> playerIds = pooled.smembers("players");
+        return playerIds.stream().map(id -> new PetalsPlayer(UUID.fromString(id), pooled)).collect(Collectors.toSet());
     }
 
     @Override

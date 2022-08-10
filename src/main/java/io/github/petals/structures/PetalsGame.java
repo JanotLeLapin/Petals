@@ -38,6 +38,17 @@ public class PetalsGame implements Game {
     }
 
     @Override
+    public void delete() {
+        // Delete each player related to the game
+        this.players().forEach(player -> player.delete());
+
+        // Delete the game
+        pooled.srem("games", this.uniqueId.toString());
+        pooled.del(this.uniqueId.toString() + ":players");
+        pooled.del(this.uniqueId.toString());
+    }
+
+    @Override
     public Player host() {
         UUID hostId = UUID.fromString(pooled.hget(this.uniqueId.toString(), "host"));
         return new PetalsPlayer(hostId, pooled);

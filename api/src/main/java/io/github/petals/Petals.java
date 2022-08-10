@@ -15,6 +15,7 @@ public abstract class Petals extends JavaPlugin {
 
     public abstract Set<Game> games();
 
+    public abstract Set<Player> players();
     public abstract Player player(UUID uniqueId);
 }
 

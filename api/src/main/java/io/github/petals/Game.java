@@ -11,6 +11,7 @@ public interface Game {
         public boolean exists();
         public Game game();
         public OfflinePlayer player();
+        public void delete();
     }
 
     // Basic
@@ -18,6 +19,7 @@ public interface Game {
     public boolean exists();
     public boolean running();
     public long ticks();
+    public void delete();
     // Players
     public Player host();
     public Set<Player> players();

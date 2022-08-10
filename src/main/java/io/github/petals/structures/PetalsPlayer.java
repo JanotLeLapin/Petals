@@ -38,5 +38,11 @@ public class PetalsPlayer implements Game.Player {
     public OfflinePlayer player() {
         return Bukkit.getOfflinePlayer(this.uniqueId);
     }
+
+    @Override
+    public void delete() {
+        this.pooled.srem("players", this.uniqueId.toString());
+        this.pooled.del(this.uniqueId.toString());
+    }
 }
 
