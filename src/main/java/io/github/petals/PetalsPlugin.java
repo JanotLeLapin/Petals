@@ -4,7 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import io.github.petals.Game.Player;
 import io.github.petals.structures.PetalsGame;
+import io.github.petals.structures.PetalsPlayer;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsPlugin extends Petals {
@@ -25,6 +27,11 @@ public class PetalsPlugin extends Petals {
     public Set<Game> games() {
         Set<String> gameIds = pooled.smembers("games");
         return gameIds.stream().map(id -> new PetalsGame(UUID.fromString(id), pooled)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Player player(UUID uniqueId) {
+        return new PetalsPlayer(uniqueId, pooled);
     }
 }
 
