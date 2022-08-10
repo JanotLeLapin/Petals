@@ -29,8 +29,9 @@ public class PetalsPlayer implements Game.Player {
 
     @Override
     public Game game() {
-        UUID gameId = UUID.fromString(this.pooled.hget(this.uniqueId.toString(), "game"));
-        return new PetalsGame(gameId, pooled);
+        String gameId = this.pooled.hget(this.uniqueId.toString(), "game");
+        // If gameId is null, pass game with random unique id as it is very likely the new game will not exist
+        return new PetalsGame(gameId == null ? UUID.randomUUID() : UUID.fromString(gameId), pooled);
     }
 
     @Override
