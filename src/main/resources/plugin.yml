@@ -1,4 +1,8 @@
 name: Petals
 version: 0.1
 main: io.github.petals.PetalsPlugin
+commands:
+  petals:
+    description: Game manager for Petals
+    permission: op
 

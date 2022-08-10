@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bukkit.command.PluginCommand;
+
 import io.github.petals.Game.Player;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
@@ -21,6 +23,15 @@ public class PetalsPlugin extends Petals {
         final short port = (short) this.getConfig().getInt("redis.port", 6379);
         this.pooled = new JedisPooled(host, port);
         this.getLogger().info("Connected to database");
+
+        // Register command
+        PluginCommand pluginCmd = this.getCommand("petals");
+        PetalsCommand petalsCmd = new PetalsCommand();
+        pluginCmd.setExecutor(petalsCmd);
+        pluginCmd.setTabCompleter(petalsCmd);
+        this.getLogger().info("Registered command");
+
+        this.getLogger().info("Enabled Petals");
     }
 
     @Override
