@@ -1,4 +1,4 @@
 name: Petals
 version: 0.1
-main: io.github.petals.JavaPetals
+main: io.github.petals.PetalsPlugin
 

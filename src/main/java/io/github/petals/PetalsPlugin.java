@@ -18,6 +18,7 @@ public class PetalsPlugin extends Petals {
         final String host = this.getConfig().getString("redis.host", "127.0.0.1");
         final short port = (short) this.getConfig().getInt("redis.port", 6379);
         this.pooled = new JedisPooled(host, port);
+        this.getLogger().info("Connected to database");
     }
 
     @Override

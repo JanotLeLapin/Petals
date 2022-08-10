@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'io.github.petals'
@@ -17,15 +19,15 @@ allprojects {
     dependencies {
         compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
     }
+
+    tasks.withType(JavaCompile) {
+        options.release = 8
+        options.encoding = 'UTF-8'
+    }
 }
 
 dependencies {
     implementation 'redis.clients:jedis:4.2.3'
     implementation project(':api')
-}
-
-// Text encoding for Java sources
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
 }
 
