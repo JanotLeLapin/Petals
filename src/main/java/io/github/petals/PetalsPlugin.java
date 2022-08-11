@@ -60,23 +60,22 @@ public class PetalsPlugin extends Petals {
     @Override
     public Set<Game> games() {
         Set<String> gameIds = pooled.smembers("games");
-        return gameIds.stream().map(id -> new PetalsGame(UUID.fromString(id), pooled)).collect(Collectors.toSet());
+        return gameIds.stream().map(id -> new PetalsGame(id, pooled)).collect(Collectors.toSet());
     }
 
     @Override
     public Set<Player> players() {
         Set<String> playerIds = pooled.smembers("players");
-        return playerIds.stream().map(id -> new PetalsPlayer(UUID.fromString(id), pooled)).collect(Collectors.toSet());
+        return playerIds.stream().map(id -> new PetalsPlayer(id, pooled)).collect(Collectors.toSet());
     }
 
     @Override
-    public Player player(UUID uniqueId) {
+    public Player player(String uniqueId) {
         return new PetalsPlayer(uniqueId, pooled);
     }
 
-    public Game createGame(UUID host, String home, String plugin) {
-        UUID uniqueId = UUID.randomUUID();
-        String uniqueIdStr = uniqueId.toString();
+    public Game createGame(String host, String home, String plugin) {
+        String uniqueId = UUID.randomUUID().toString();
 
         createPlayer(host, uniqueId);
         createWorld(home, uniqueId);
@@ -84,35 +83,30 @@ public class PetalsPlugin extends Petals {
         // Create game
         HashMap<String, String> map = new HashMap<>();
         map.put("start", "-1");
-        map.put("host", host.toString());
+        map.put("host", host);
         map.put("home", home);
         map.put("plugin", plugin);
-        pooled.hset(uniqueIdStr, map);
+        pooled.hset(uniqueId, map);
 
-        pooled.sadd("games", uniqueIdStr);
+        pooled.sadd("games", uniqueId);
 
         return new PetalsGame(uniqueId, pooled);
     }
 
-    public World createWorld(String name, UUID game) {
-        String gameStr = game.toString();
-
-        pooled.hset("worlds", name, gameStr);
-        pooled.sadd(gameStr + ":worlds", name);
+    public World createWorld(String name, String game) {
+        pooled.hset("worlds", name, game);
+        pooled.sadd(game + ":worlds", name);
 
         return new PetalsWorld(name, pooled);
     }
 
-    public Player createPlayer(UUID player, UUID game) {
-        String playerStr = player.toString();
-        String gameStr = game.toString();
-
+    public Player createPlayer(String player, String game) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("game", gameStr);
-        pooled.hset(playerStr, map);
+        map.put("game", game);
+        pooled.hset(player, map);
 
-        pooled.sadd(gameStr + ":players", playerStr);
-        pooled.sadd("players", playerStr);
+        pooled.sadd(game + ":players", player);
+        pooled.sadd("players", player);
 
         return new PetalsPlayer(player, pooled);
     }

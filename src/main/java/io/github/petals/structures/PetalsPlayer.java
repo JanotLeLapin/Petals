@@ -9,40 +9,38 @@ import io.github.petals.Game;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsPlayer implements Game.Player {
-    private UUID uniqueId;
+    private String uniqueId;
     private JedisPooled pooled;
 
-    public PetalsPlayer(UUID uniqueId, JedisPooled pooled) {
+    public PetalsPlayer(String uniqueId, JedisPooled pooled) {
         this.uniqueId = uniqueId;
         this.pooled = pooled;
     }
 
     @Override
-    public UUID uniqueId() {
+    public String uniqueId() {
         return this.uniqueId;
     }
 
     @Override
     public boolean exists() {
-        return this.pooled.sismember("players", this.uniqueId.toString());
+        return this.pooled.sismember("players", this.uniqueId);
     }
 
     @Override
     public Game game() {
-        String gameId = this.pooled.hget(this.uniqueId.toString(), "game");
-        // If gameId is null, pass game with random unique id as it is very likely the new game will not exist
-        return new PetalsGame(gameId == null ? UUID.randomUUID() : UUID.fromString(gameId), pooled);
+        return new PetalsGame(this.pooled.hget(this.uniqueId, "game"), pooled);
     }
 
     @Override
     public OfflinePlayer player() {
-        return Bukkit.getOfflinePlayer(this.uniqueId);
+        return Bukkit.getOfflinePlayer(UUID.fromString(this.uniqueId));
     }
 
     @Override
     public void delete() {
-        this.pooled.srem("players", this.uniqueId.toString());
-        this.pooled.del(this.uniqueId.toString());
+        this.pooled.srem("players", this.uniqueId);
+        this.pooled.del(this.uniqueId);
     }
 }
 

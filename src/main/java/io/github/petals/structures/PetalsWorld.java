@@ -29,7 +29,7 @@ public class PetalsWorld implements World {
 
     @Override
     public Game game() {
-        return new PetalsGame(UUID.fromString(pooled.hget("worlds", this.name)), this.pooled);
+        return new PetalsGame(pooled.hget("worlds", this.name), this.pooled);
     }
 
     @Override

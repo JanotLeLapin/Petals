@@ -25,7 +25,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             final Plugin plugin = Bukkit.getPluginManager().getPlugin(args[1]);
             if (plugin == null || !(plugin instanceof Petal)) return false;
 
-            Game game = PetalsPlugin.petals().createGame(((Player) sender).getUniqueId(), "world", plugin.getName());
+            Game game = PetalsPlugin.petals().createGame(((Player) sender).getUniqueId().toString(), "world", plugin.getName());
             ((Petal) plugin).onCreateGame(game);
 
             return true;
@@ -36,14 +36,14 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             if (args.length < 2) {
                 game = Petals
                     .petals()
-                    .player(((Player) sender).getUniqueId())
+                    .player(((Player) sender).getUniqueId().toString())
                     .game();
             } else {
                 game = Petals
                     .petals()
                     .games()
                     .stream()
-                    .filter(g -> g.uniqueId().toString().equals(args[1]))
+                    .filter(g -> g.uniqueId().equals(args[1]))
                     .collect(Collectors.toList())
                     .get(0);
             }
@@ -55,7 +55,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                     game.plugin().onStartGame(game);
                     return true;
                 case "get":
-                    sender.sendMessage(game.uniqueId().toString());
+                    sender.sendMessage(game.uniqueId());
                     return true;
                 case "stop":
                     // TODO: Start game
@@ -92,7 +92,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                         .petals()
                         .games()
                         .stream()
-                        .map(game -> game.uniqueId().toString())
+                        .map(game -> game.uniqueId())
                         .collect(Collectors.toList());
 
                     completions.addAll(games);
