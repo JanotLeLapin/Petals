@@ -51,6 +51,7 @@ public class PetalsGame implements Game {
     public void delete() {
         // Delete each player related to the game
         this.players().forEach(player -> player.delete());
+        this.worlds().forEach(world -> world.delete());
 
         // Delete the game
         pooled.srem("games", this.uniqueId.toString());
@@ -68,6 +69,17 @@ public class PetalsGame implements Game {
     public Set<Player> players() {
         Set<String> playerIds = pooled.smembers(this.uniqueId.toString() + ":players");
         return playerIds.stream().map(id -> new PetalsPlayer(UUID.fromString(id), pooled)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public World home() {
+        return new PetalsWorld(pooled.hget(this.uniqueId.toString(), "home"), pooled);
+    }
+
+    @Override
+    public Set<World> worlds() {
+        Set<String> worldNames = pooled.smembers(this.uniqueId.toString() + ":worlds");
+        return worldNames.stream().map(name -> new PetalsWorld(name, pooled)).collect(Collectors.toSet());
     }
 }
 

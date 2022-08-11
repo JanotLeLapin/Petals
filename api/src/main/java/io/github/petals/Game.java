@@ -14,6 +14,14 @@ public interface Game {
         public void delete();
     }
 
+    public static interface World {
+        public String name();
+        public boolean exists();
+        public Game game();
+        public org.bukkit.World world();
+        public void delete();
+    }
+
     // Basic
     public UUID uniqueId();
     public boolean exists();
@@ -24,5 +32,8 @@ public interface Game {
     // Players
     public Player host();
     public Set<Player> players();
+    // Worlds
+    public World home();
+    public Set<World> worlds();
 }
 

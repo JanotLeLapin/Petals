@@ -9,8 +9,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 
 import io.github.petals.Game.Player;
+import io.github.petals.Game.World;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
+import io.github.petals.structures.PetalsWorld;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -72,23 +74,33 @@ public class PetalsPlugin extends Petals {
         return new PetalsPlayer(uniqueId, pooled);
     }
 
-    public Game createGame(UUID host, String plugin) {
+    public Game createGame(UUID host, String home, String plugin) {
         UUID uniqueId = UUID.randomUUID();
         String uniqueIdStr = uniqueId.toString();
+
+        createPlayer(host, uniqueId);
+        createWorld(home, uniqueId);
 
         // Create game
         HashMap<String, String> map = new HashMap<>();
         map.put("start", "-1");
-        map.put("plugin", plugin);
         map.put("host", host.toString());
+        map.put("home", home);
+        map.put("plugin", plugin);
         pooled.hset(uniqueIdStr, map);
 
         pooled.sadd("games", uniqueIdStr);
 
-        // Create host player
-        createPlayer(host, uniqueId);
-
         return new PetalsGame(uniqueId, pooled);
+    }
+
+    public World createWorld(String name, UUID game) {
+        String gameStr = game.toString();
+
+        pooled.hset("worlds", name, gameStr);
+        pooled.sadd(gameStr + ":worlds", name);
+
+        return new PetalsWorld(name, pooled);
     }
 
     public Player createPlayer(UUID player, UUID game) {
