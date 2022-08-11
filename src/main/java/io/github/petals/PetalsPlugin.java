@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.petals.Game.Player;
 import io.github.petals.Game.World;
@@ -16,7 +17,7 @@ import io.github.petals.structures.PetalsWorld;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-public class PetalsPlugin extends Petals {
+public class PetalsPlugin extends JavaPlugin implements Petals {
     private JedisPooled pooled;
 
     static PetalsPlugin petals() {
