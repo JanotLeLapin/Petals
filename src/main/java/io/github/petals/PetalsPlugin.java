@@ -4,12 +4,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 
 import io.github.petals.Game.Player;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
 import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 public class PetalsPlugin extends Petals {
     private JedisPooled pooled;
@@ -22,6 +24,13 @@ public class PetalsPlugin extends Petals {
         final String host = this.getConfig().getString("redis.host", "127.0.0.1");
         final short port = (short) this.getConfig().getInt("redis.port", 6379);
         this.pooled = new JedisPooled(host, port);
+        try {
+            this.pooled.get("ping");
+        } catch (JedisConnectionException e) {
+            this.getLogger().info("Could not reach database");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
         this.getLogger().info("Connected to database");
 
         // Register command
@@ -36,7 +45,9 @@ public class PetalsPlugin extends Petals {
 
     @Override
     public void onDisable() {
-        this.games().forEach(game -> game.delete());
+        try {
+            this.games().forEach(game -> game.delete());
+        } catch (JedisConnectionException e) {}
     }
 
     @Override
