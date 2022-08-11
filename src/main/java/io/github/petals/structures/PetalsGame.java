@@ -36,8 +36,9 @@ public class PetalsGame implements Game {
 
     @Override
     public long ticks() {
-        // TODO: Use world time & start time to calculate ticks
-        return 0;
+        return running()
+            ? Bukkit.getWorlds().get(0).getFullTime() - Long.parseLong(pooled.hget(this.uniqueId.toString(), "start"))
+            : 0;
     }
 
     @Override
