@@ -17,6 +17,8 @@ gradlew.bat shadowJar # Windows
 ./gradlew shadowJar # MacOS & Linux
 ```
 
+You can find the compiled plugin in `build/libs/petals-0.1-all.jar`.
+
 ### Running the database
 
 You'll need [Docker](https://www.docker.com/) to run your instance of a Redis store.
@@ -43,7 +45,7 @@ gradlew.bar publishToMavenLocal # Windows
 ./gradlew shadowJar # MacOS & Linux
 ```
 
-You can now add the Petals API to your `build.gradle` dependencies.
+You can now add the Petals API to your dependencies in `build.gradle`.
 
 ```groovy
 repositories {
