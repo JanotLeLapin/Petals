@@ -32,10 +32,21 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equals("start") || args[0].equals("get") || args[0].equals("stop")) {
-            final Game game = Petals
-                .petals()
-                .player(((Player) sender).getUniqueId())
-                .game();
+            final Game game;
+            if (args.length < 2) {
+                game = Petals
+                    .petals()
+                    .player(((Player) sender).getUniqueId())
+                    .game();
+            } else {
+                game = Petals
+                    .petals()
+                    .games()
+                    .stream()
+                    .filter(g -> g.uniqueId().toString().equals(args[1]))
+                    .collect(Collectors.toList())
+                    .get(0);
+            }
             if (!game.exists()) return false;
 
             switch (args[0]) {
@@ -76,6 +87,15 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                         .collect(Collectors.toList());
 
                     completions.addAll(plugins);
+                } else {
+                    List<String> games = Petals
+                        .petals()
+                        .games()
+                        .stream()
+                        .map(game -> game.uniqueId().toString())
+                        .collect(Collectors.toList());
+
+                    completions.addAll(games);
                 }
                 break;
         }
