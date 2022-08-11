@@ -36,7 +36,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 public class PetalsPlugin extends JavaPlugin implements Petals {
     private JedisPooled pooled;
 
-    static PetalsPlugin petals() {
+    public static PetalsPlugin petals() {
         return (PetalsPlugin) Bukkit.getPluginManager().getPlugin("Petals");
     }
 
@@ -78,12 +78,6 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     public Set<Game> games() {
         Set<String> gameIds = pooled.smembers("games");
         return gameIds.stream().map(id -> new PetalsGame(id, pooled)).collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<Player> players() {
-        Set<String> playerIds = pooled.smembers("players");
-        return playerIds.stream().map(id -> new PetalsPlayer(id, pooled)).collect(Collectors.toSet());
     }
 
     @Override
@@ -163,9 +157,6 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     public Game createGame(String host, String home, String plugin) {
         String uniqueId = UUID.randomUUID().toString();
 
-        createPlayer(host, uniqueId);
-        createWorld(home, uniqueId);
-
         // Create game
         HashMap<String, String> map = new HashMap<>();
         map.put("start", "-1");
@@ -173,8 +164,10 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         map.put("home", home);
         map.put("plugin", plugin);
         pooled.hset(uniqueId, map);
-
         pooled.sadd("games", uniqueId);
+
+        createPlayer(host, uniqueId);
+        createWorld(home, uniqueId);
 
         return new PetalsGame(uniqueId, pooled);
     }
@@ -194,7 +187,9 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         pooled.sadd(game + ":players", player);
         pooled.sadd("players", player);
 
-        return new PetalsPlayer(player, pooled);
+        Player p = new PetalsPlayer(player, pooled);
+        p.game().plugin().onAddPlayer(p);
+        return p;
     }
 }
 

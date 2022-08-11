@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 
 import io.github.petals.Game;
 import io.github.petals.Petal;
+import io.github.petals.PetalsPlugin;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsGame implements Game {
@@ -66,7 +67,17 @@ public class PetalsGame implements Game {
     @Override
     public Set<Player> players() {
         Set<String> playerIds = pooled.smembers(this.uniqueId + ":players");
-        return playerIds.stream().map(id -> new PetalsPlayer(id, pooled)).collect(Collectors.toSet());
+        return playerIds.stream().map(id -> this.player(id)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Player player(String uniqueId) {
+        return new PetalsPlayer(uniqueId, pooled);
+    }
+
+    @Override
+    public Player addPlayer(String uniqueId) {
+        return PetalsPlugin.petals().createPlayer(uniqueId, this.uniqueId);
     }
 
     @Override
@@ -77,7 +88,17 @@ public class PetalsGame implements Game {
     @Override
     public Set<World> worlds() {
         Set<String> worldNames = pooled.smembers(this.uniqueId + ":worlds");
-        return worldNames.stream().map(name -> new PetalsWorld(name, pooled)).collect(Collectors.toSet());
+        return worldNames.stream().map(name -> this.world(name)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public World world(String name) {
+        return new PetalsWorld(name, pooled);
+    }
+
+    @Override
+    public World addWorld(String name) {
+        return PetalsPlugin.petals().createWorld(name, this.uniqueId);
     }
 }
 

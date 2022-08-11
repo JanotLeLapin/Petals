@@ -31,8 +31,12 @@ public interface Game {
     // Players
     public Player host();
     public Set<Player> players();
+    public Player player(String uniqueId);
+    public Player addPlayer(String uniqueId);
     // Worlds
     public World home();
     public Set<World> worlds();
+    public World world(String name);
+    public World addWorld(String name);
 }
 

@@ -39,6 +39,7 @@ public class PetalsPlayer implements Game.Player {
 
     @Override
     public void delete() {
+        this.game().plugin().onRemovePlayer(this);
         this.pooled.srem("players", this.uniqueId);
         this.pooled.del(this.uniqueId);
     }

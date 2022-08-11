@@ -15,9 +15,7 @@ public interface Petals {
 
     public Set<Game> games();
 
-    public Set<Player> players();
     public Player player(String uniqueId);
-
     public World world(String name);
 
     public void registerEvents(GameListener listener, Petal plugin);
