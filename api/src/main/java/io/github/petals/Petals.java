@@ -8,6 +8,7 @@ import io.github.petals.Game.Player;
 import io.github.petals.Game.World;
 import io.github.petals.event.GameListener;
 
+/** The Petals API */
 public interface Petals {
     /** @return an instance of the Petals plugin */
     static Petals petals() {

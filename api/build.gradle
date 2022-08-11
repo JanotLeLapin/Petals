@@ -6,6 +6,11 @@ plugins {
 group = 'io.github.petals'
 version = '0.1'
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
