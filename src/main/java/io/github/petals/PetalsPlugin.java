@@ -1,5 +1,6 @@
 package io.github.petals;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,6 +16,10 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 public class PetalsPlugin extends Petals {
     private JedisPooled pooled;
+
+    static PetalsPlugin petals() {
+        return (PetalsPlugin) Bukkit.getPluginManager().getPlugin("Petals");
+    }
 
     @Override
     public void onEnable() {
@@ -65,6 +70,39 @@ public class PetalsPlugin extends Petals {
     @Override
     public Player player(UUID uniqueId) {
         return new PetalsPlayer(uniqueId, pooled);
+    }
+
+    public Game createGame(UUID host, String plugin) {
+        UUID uniqueId = UUID.randomUUID();
+        String uniqueIdStr = uniqueId.toString();
+
+        // Create game
+        HashMap<String, String> map = new HashMap<>();
+        map.put("start", "-1");
+        map.put("plugin", plugin);
+        map.put("host", host.toString());
+        pooled.hset(uniqueIdStr, map);
+
+        pooled.sadd("games", uniqueIdStr);
+
+        // Create host player
+        createPlayer(host, uniqueId);
+
+        return new PetalsGame(uniqueId, pooled);
+    }
+
+    public Player createPlayer(UUID player, UUID game) {
+        String playerStr = player.toString();
+        String gameStr = game.toString();
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("game", gameStr);
+        pooled.hset(playerStr, map);
+
+        pooled.sadd(gameStr + ":players", playerStr);
+        pooled.sadd("players", playerStr);
+
+        return new PetalsPlayer(player, pooled);
     }
 }
 
