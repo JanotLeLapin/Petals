@@ -1,7 +1,5 @@
 package io.github.petals.structures;
 
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 
 import io.github.petals.Game;
@@ -24,7 +22,7 @@ public class PetalsWorld implements World {
 
     @Override
     public boolean exists() {
-        return pooled.hget("worlds", this.name) != null;
+        return this.name == null ? false : pooled.hget("worlds", this.name) != null;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class PetalsGame implements Game {
 
     @Override
     public boolean exists() {
-        return pooled.sismember("games", this.uniqueId);
+        return this.uniqueId == null ? false : pooled.sismember("games", this.uniqueId);
     }
 
     @Override

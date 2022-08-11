@@ -1,5 +1,7 @@
 package io.github.petals;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
@@ -7,10 +9,24 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.vehicle.VehicleEvent;
+import org.bukkit.event.weather.WeatherEvent;
+import org.bukkit.event.world.WorldEvent;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.petals.Game.Player;
 import io.github.petals.Game.World;
+import io.github.petals.event.GameListener;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
 import io.github.petals.structures.PetalsWorld;
@@ -73,6 +89,75 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     @Override
     public Player player(String uniqueId) {
         return new PetalsPlayer(uniqueId, pooled);
+    }
+
+    @Override
+    public World world(String name) {
+        return new PetalsWorld(name, pooled);
+    }
+
+    @Override
+    public void registerEvents(GameListener listener, Petal plugin) {
+        Method[] handlers = listener.getClass().getDeclaredMethods();
+        for (int i = 0; i < handlers.length; i++) {
+            Method handler = handlers[i];
+
+            EventHandler annotation = handler.getDeclaredAnnotation(EventHandler.class);
+            if (annotation == null
+                || handler.getParameterCount() < 1
+                || !Event.class.isAssignableFrom(handler.getParameterTypes()[0])) continue;
+
+            EventExecutor executor;
+            switch (handler.getParameterCount()) {
+                case 1:
+                    executor = new EventExecutor() {
+                        @Override
+                        public void execute(Listener _listener, Event event) throws EventException {
+                            try {
+                                handler.invoke(listener, event);
+                            } catch (InvocationTargetException | IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    break;
+                case 2:
+                    executor = new EventExecutor() {
+                        @Override
+                        public void execute(Listener _listener, Event event) throws EventException {
+                            Game game;
+                            if (event instanceof BlockEvent) game = world(((BlockEvent) event).getBlock().getWorld().getName()).game();
+                            else if (event instanceof EntityEvent) game = world(((EntityEvent) event).getEntity().getWorld().getName()).game();
+                            else if (event instanceof InventoryEvent) game = player(((InventoryEvent) event).getView().getPlayer().getUniqueId().toString()).game();
+                            else if (event instanceof PlayerEvent) game = player(((PlayerEvent) event).getPlayer().getUniqueId().toString()).game();
+                            else if (event instanceof VehicleEvent) game = world(((VehicleEvent) event).getVehicle().getWorld().getName()).game();
+                            else if (event instanceof WeatherEvent) game = world(((WeatherEvent) event).getWorld().getName()).game();
+                            else if (event instanceof WorldEvent) game = world(((WorldEvent) event).getWorld().getName()).game();
+                            else return;
+
+                            if (!game.exists() || !game.plugin().equals(plugin)) return;
+
+                            try {
+                                handler.invoke(listener, event, game);
+                            } catch (InvocationTargetException | IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    break;
+                default:
+                    continue;
+            }
+
+            this.getServer().getPluginManager().registerEvent(
+                (Class<Event>) handler.getParameterTypes()[0],
+                listener,
+                annotation.priority(),
+                executor,
+                (Plugin) plugin,
+                annotation.ignoreCancelled()
+            );
+        }
     }
 
     public Game createGame(String host, String home, String plugin) {
