@@ -6,6 +6,6 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{java,gradle,rs,toml}]
+[*.{java,gradle,rs,toml,md}]
 indent_size = 4
 

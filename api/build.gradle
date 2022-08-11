@@ -1,7 +1,19 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'io.github.petals'
 version = '0.1'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'io.github.petals'
+            artifactId = 'petals-api'
+
+            from components.java
+        }
+    }
+}
 
