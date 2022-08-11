@@ -23,8 +23,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             if (args.length < 2) return false;
 
             final Plugin plugin = Bukkit.getPluginManager().getPlugin(args[1]);
-            // TODO: Check if plugin is petals
-            if (plugin == null) return false;
+            if (plugin == null || !(plugin instanceof Petal)) return false;
 
             // TODO: Create game
             return true;
@@ -38,11 +37,17 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             if (!game.exists()) return false;
 
             switch (args[0]) {
-                case "start": /* TODO: Start game */ return true;
+                case "start":
+                    // TODO: Start game
+                    game.plugin().onStartGame(game);
+                    return true;
                 case "get":
                     sender.sendMessage(game.uniqueId().toString());
                     return true;
-                case "stop": /* TODO: Stop game */ return true;
+                case "stop":
+                    // TODO: Start game
+                    game.plugin().onStopGame(game);
+                    return true;
             }
         }
 
@@ -64,7 +69,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                     List<String> plugins = Arrays
                         .asList(Bukkit.getPluginManager().getPlugins())
                         .stream()
-                        .filter(plugin -> /* TODO: Only show petals plugins */ true)
+                        .filter(plugin -> plugin instanceof Petal)
                         .map(plugin -> plugin.getName())
                         .collect(Collectors.toList());
 

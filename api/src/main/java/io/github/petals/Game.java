@@ -19,6 +19,7 @@ public interface Game {
     public boolean exists();
     public boolean running();
     public long ticks();
+    public Petal plugin();
     public void delete();
     // Players
     public Player host();

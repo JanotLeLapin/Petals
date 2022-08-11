@@ -4,7 +4,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+
 import io.github.petals.Game;
+import io.github.petals.Petal;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsGame implements Game {
@@ -35,6 +38,12 @@ public class PetalsGame implements Game {
     public long ticks() {
         // TODO: Use world time & start time to calculate ticks
         return 0;
+    }
+
+    @Override
+    public Petal plugin() {
+        String pluginName = pooled.hget(this.uniqueId.toString(), "plugin");
+        return (Petal) Bukkit.getPluginManager().getPlugin(pluginName);
     }
 
     @Override
