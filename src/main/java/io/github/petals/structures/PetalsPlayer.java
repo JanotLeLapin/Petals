@@ -1,11 +1,13 @@
 package io.github.petals.structures;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import io.github.petals.Game;
+import io.github.petals.Metadata;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsPlayer implements Game.Player {
@@ -38,8 +40,16 @@ public class PetalsPlayer implements Game.Player {
     }
 
     @Override
+    public Map<String, String> meta() {
+        return new Metadata(this.uniqueId + ":meta", this.pooled);
+    }
+
+    @Override
     public void delete() {
         this.game().plugin().onRemovePlayer(this);
+
+        this.meta().clear();
+
         this.pooled.srem("players", this.uniqueId);
         this.pooled.del(this.uniqueId);
     }

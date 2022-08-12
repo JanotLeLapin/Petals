@@ -1,5 +1,6 @@
 package io.github.petals;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.OfflinePlayer;
@@ -17,6 +18,8 @@ public interface Game {
         public Game game();
         /** @return the Bukkit representation of this player */
         public OfflinePlayer player();
+        /** @return the custom metadata of this player */
+        public Map<String, String> meta();
         /** Removes the player from his game, then deletes him from the database */
         public void delete();
     }
