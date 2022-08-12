@@ -102,8 +102,6 @@ public interface Game {
      */
     public Player addPlayer(String uniqueId);
     // Worlds
-    /** @return main world for this game */
-    public World home();
     /** @return every world in this game */
     public Set<World> worlds();
     /**

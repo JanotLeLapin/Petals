@@ -90,11 +90,6 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public World home() {
-        return new PetalsWorld(pooled.hget(this.uniqueId, "home"), pooled);
-    }
-
-    @Override
     public Set<World> worlds() {
         Set<String> worldNames = pooled.smembers(this.uniqueId + ":worlds");
         return worldNames.stream().map(name -> this.world(name)).collect(Collectors.toSet());

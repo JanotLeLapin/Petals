@@ -46,10 +46,9 @@ public interface Petals extends Plugin {
      * Creates a new game
      *
      * @param host The unique ID of the host for the game, has every permissions
-     * @param home The name of the main world for this game
      * @param plugin The plugin responsible for this game
      * @return The game
      */
-    public Game createGame(String host, String home, Petal plugin);
+    public Game createGame(String host, Petal plugin);
 }
 

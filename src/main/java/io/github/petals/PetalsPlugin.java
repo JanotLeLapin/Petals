@@ -29,6 +29,7 @@ import io.github.petals.Game.World;
 import io.github.petals.event.GameListener;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
+import io.github.petals.structures.PetalsScheduler;
 import io.github.petals.structures.PetalsWorld;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -154,22 +155,23 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         }
     }
 
-    public Game createGame(String host, String home, Petal plugin) {
+    @Override
+    public Game createGame(String host, Petal plugin) {
         String uniqueId = UUID.randomUUID().toString();
 
         // Create game
         HashMap<String, String> map = new HashMap<>();
         map.put("start", "-1");
         map.put("host", host);
-        map.put("home", home);
         map.put("plugin", plugin.getName());
         pooled.hset(uniqueId, map);
         pooled.sadd("games", uniqueId);
 
         createPlayer(host, uniqueId);
-        createWorld(home, uniqueId);
 
-        return new PetalsGame(uniqueId, pooled);
+        Game game = new PetalsGame(uniqueId, pooled);
+        plugin.onCreateGame(game);
+        return game;
     }
 
     public World createWorld(String name, String game) {
