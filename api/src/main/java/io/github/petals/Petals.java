@@ -27,12 +27,26 @@ public interface Petals extends Plugin {
      */
     public Player player(String uniqueId);
     /**
+     * Finds a player stored in the database from a Bukkit Player instance. Although never null, it may not exist
+     *
+     * @param player The player ID to lookup
+     * @return The player handle
+     */
+    public Player player(org.bukkit.entity.Player player);
+    /**
      * Finds a world stored in the database from its name. Although never null, it may not exist
      *
      * @param name The world name to lookup
      * @return The world handle
      */
     public World world(String name);
+    /**
+     * Finds a world stored in the database from a Bukkit World instance. Although never null, it may not exist
+     *
+     * @param world The world name to lookup
+     * @return The world handle
+     */
+    public World world(org.bukkit.World world);
 
     /**
      * Listens for events

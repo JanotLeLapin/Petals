@@ -87,8 +87,18 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     }
 
     @Override
+    public Player player(org.bukkit.entity.Player player) {
+        return new PetalsPlayer(player.getUniqueId().toString(), pooled);
+    }
+
+    @Override
     public World world(String name) {
         return new PetalsWorld(name, pooled);
+    }
+
+    @Override
+    public World world(org.bukkit.World world) {
+        return new PetalsWorld(world.getName(), pooled);
     }
 
     @Override
@@ -121,13 +131,13 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
                         @Override
                         public void execute(Listener _listener, Event event) throws EventException {
                             Game game;
-                            if (event instanceof BlockEvent) game = world(((BlockEvent) event).getBlock().getWorld().getName()).game();
-                            else if (event instanceof EntityEvent) game = world(((EntityEvent) event).getEntity().getWorld().getName()).game();
+                            if (event instanceof BlockEvent) game = world(((BlockEvent) event).getBlock().getWorld()).game();
+                            else if (event instanceof EntityEvent) game = world(((EntityEvent) event).getEntity().getWorld()).game();
                             else if (event instanceof InventoryEvent) game = player(((InventoryEvent) event).getView().getPlayer().getUniqueId().toString()).game();
-                            else if (event instanceof PlayerEvent) game = player(((PlayerEvent) event).getPlayer().getUniqueId().toString()).game();
-                            else if (event instanceof VehicleEvent) game = world(((VehicleEvent) event).getVehicle().getWorld().getName()).game();
-                            else if (event instanceof WeatherEvent) game = world(((WeatherEvent) event).getWorld().getName()).game();
-                            else if (event instanceof WorldEvent) game = world(((WorldEvent) event).getWorld().getName()).game();
+                            else if (event instanceof PlayerEvent) game = player(((PlayerEvent) event).getPlayer()).game();
+                            else if (event instanceof VehicleEvent) game = world(((VehicleEvent) event).getVehicle().getWorld()).game();
+                            else if (event instanceof WeatherEvent) game = world(((WeatherEvent) event).getWorld()).game();
+                            else if (event instanceof WorldEvent) game = world(((WorldEvent) event).getWorld()).game();
                             else return;
 
                             if (!game.exists() || !game.plugin().equals(plugin)) return;
