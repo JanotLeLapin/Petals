@@ -48,10 +48,19 @@ public class PetalsGame implements Game {
     }
 
     @Override
+    public Scheduler scheduler() {
+        return new PetalsScheduler(this.uniqueId, pooled);
+    }
+
+    @Override
     public void delete() {
-        // Delete each player related to the game
+        // Delete players
         this.players().forEach(player -> player.delete());
+        // Delete worlds
         this.worlds().forEach(world -> world.delete());
+
+        // Delete tasks
+        this.scheduler().clear();
 
         // Delete the game
         pooled.srem("games", this.uniqueId);

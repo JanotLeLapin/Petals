@@ -3,6 +3,7 @@ package io.github.petals;
 import java.util.Set;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.scheduler.BukkitTask;
 
 /** Reference to a game stored in the database */
 public interface Game {
@@ -34,6 +35,35 @@ public interface Game {
         public void delete();
     }
 
+    /** Task scheduler for a game */
+    public static interface Scheduler {
+        /**
+         * Schedules a given runnable
+         *
+         * @param delay The amount of ticks to wait before running
+         * @param runnable The runnable
+         * @return A Bukkit task
+         */
+        public BukkitTask runTaskLater(long delay, Runnable runnable);
+        /**
+         * Schedules a given runnable
+         *
+         * @param delay The amount of ticks to wait before running
+         * @param period The amount of ticks between each run
+         * @param runnable The runnable
+         * @return A Bukkit task
+         */
+        public BukkitTask runTaskTimer(long delay, long period, Runnable runnable);
+        /**
+         * Removes a task associated with the given task ID
+         *
+         * @param taskId The task ID
+         */
+        public void cancel(int taskId);
+        /** Removes each task associated with this scheduler */
+        public void clear();
+    }
+
     // Basic
     /** @return the universally unique identifier of this game */
     public String uniqueId();
@@ -45,6 +75,8 @@ public interface Game {
     public long ticks();
     /** @return the {@link Petal} plugin managing this game */
     public Petal plugin();
+    /** @return the {@link Scheduler} for this game */
+    public Scheduler scheduler();
     /** Deletes all players and worlds from the game then deletes the game */
     public void delete();
     // Players
