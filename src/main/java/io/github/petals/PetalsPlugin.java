@@ -154,7 +154,7 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         }
     }
 
-    public Game createGame(String host, String home, String plugin) {
+    public Game createGame(String host, String home, Petal plugin) {
         String uniqueId = UUID.randomUUID().toString();
 
         // Create game
@@ -162,7 +162,7 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         map.put("start", "-1");
         map.put("host", host);
         map.put("home", home);
-        map.put("plugin", plugin);
+        map.put("plugin", plugin.getName());
         pooled.hset(uniqueId, map);
         pooled.sadd("games", uniqueId);
 

@@ -41,5 +41,15 @@ public interface Petals extends Plugin {
      * @param plugin The {@link Petal} plugin associated with the listener
      */
     public void registerEvents(GameListener listener, Petal plugin);
+
+    /**
+     * Creates a new game
+     *
+     * @param host The unique ID of the host for the game, has every permissions
+     * @param home The name of the main world for this game
+     * @param plugin The plugin responsible for this game
+     * @return The game
+     */
+    public Game createGame(String host, String home, Petal plugin);
 }
 
