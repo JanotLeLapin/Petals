@@ -55,7 +55,14 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                     game.plugin().onStartGame(game);
                     return true;
                 case "get":
-                    sender.sendMessage(game.uniqueId());
+                    sender.sendMessage(new String[] {
+                        String.format("Game ID: %s", game.uniqueId()),
+                        String.format("Player count: %d", game.players().size()),
+                        String.format("Host: %s", game.host().player().getName()),
+                        String.format("Seconds elapsed: %d", game.ticks() / 20),
+                        String.format("Plugin: %s", game.plugin().getName()),
+                        String.format("Status: %s", game.running() ? "running" : "creating"),
+                    });
                     return true;
                 case "stop":
                     // TODO: Start game
