@@ -27,6 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import io.github.petals.Game.Player;
 import io.github.petals.Game.World;
 import io.github.petals.event.GameListener;
+import io.github.petals.role.Role;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
 import io.github.petals.structures.PetalsScheduler;
@@ -82,13 +83,13 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     }
 
     @Override
-    public Player player(String uniqueId) {
-        return new PetalsPlayer(uniqueId, pooled);
+    public Player<Role> player(String uniqueId) {
+        return new PetalsPlayer<Role>(uniqueId, pooled);
     }
 
     @Override
-    public Player player(org.bukkit.entity.Player player) {
-        return new PetalsPlayer(player.getUniqueId().toString(), pooled);
+    public Player<Role> player(org.bukkit.entity.Player player) {
+        return new PetalsPlayer<Role>(player.getUniqueId().toString(), pooled);
     }
 
     @Override
@@ -191,7 +192,7 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         return new PetalsWorld(name, pooled);
     }
 
-    public Player createPlayer(String player, String game) {
+    public <T extends Role> Player<T> createPlayer(String player, String game) {
         HashMap<String, String> map = new HashMap<>();
         map.put("game", game);
         pooled.hset(player, map);
@@ -199,8 +200,8 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         pooled.sadd(game + ":players", player);
         pooled.sadd("players", player);
 
-        Player p = new PetalsPlayer(player, pooled);
-        p.game().plugin().onAddPlayer(p);
+        Player<T> p = new PetalsPlayer<>(player, pooled);
+        p.game().plugin().onAddPlayer((Player<Role>) p);
         return p;
     }
 }

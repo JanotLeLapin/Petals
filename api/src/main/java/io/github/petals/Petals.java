@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import io.github.petals.Game.Player;
 import io.github.petals.Game.World;
 import io.github.petals.event.GameListener;
+import io.github.petals.role.Role;
 
 /** The Petals API */
 public interface Petals extends Plugin {
@@ -25,14 +26,14 @@ public interface Petals extends Plugin {
      * @param uniqueId The player ID to lookup
      * @return The player handle
      */
-    public Player player(String uniqueId);
+    public Player<Role> player(String uniqueId);
     /**
      * Finds a player stored in the database from a Bukkit Player instance. Although never null, it may not exist
      *
      * @param player The player ID to lookup
      * @return The player handle
      */
-    public Player player(org.bukkit.entity.Player player);
+    public Player<Role> player(org.bukkit.entity.Player player);
     /**
      * Finds a world stored in the database from its name. Although never null, it may not exist
      *
@@ -59,7 +60,7 @@ public interface Petals extends Plugin {
     /**
      * Creates a new game
      *
-     * @param host The unique ID of the host for the game, has every permissions
+     * @param host The host player ID for this game
      * @param plugin The plugin responsible for this game
      * @return The game
      */

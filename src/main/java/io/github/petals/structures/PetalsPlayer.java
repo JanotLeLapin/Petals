@@ -1,5 +1,6 @@
 package io.github.petals.structures;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -8,10 +9,12 @@ import org.bukkit.OfflinePlayer;
 
 import io.github.petals.Game;
 import io.github.petals.Metadata;
+import io.github.petals.role.Role;
 import redis.clients.jedis.JedisPooled;
 
-public class PetalsPlayer implements Game.Player {
+public class PetalsPlayer<T extends Role> implements Game.Player<T> {
     private String uniqueId;
+    private T role = null;
     private JedisPooled pooled;
 
     public PetalsPlayer(String uniqueId, JedisPooled pooled) {
@@ -45,8 +48,33 @@ public class PetalsPlayer implements Game.Player {
     }
 
     @Override
+    public T role() {
+        if (this.role != null) return this.role;
+
+        // Cache role
+        String roleClass = pooled.hget(uniqueId, "role");
+        if (roleClass != null) {
+            try {
+                Class<?> role = Class.forName(pooled.hget(uniqueId, "role"));
+                if (!Role.class.isAssignableFrom(role)) throw new ClassCastException(String.format("%s does not implement Role", role.getName()));
+
+                this.role = (T) role.getConstructor(Game.Player.class).newInstance(this);
+            } catch (ClassNotFoundException | ClassCastException | InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return this.role;
+    }
+
+    @Override
+    public void role(Class<? extends Role> role) {
+        this.pooled.hset(this.uniqueId, "role", role.getName());
+    }
+
+    @Override
     public void delete() {
-        this.game().plugin().onRemovePlayer(this);
+        this.game().plugin().onRemovePlayer((Game.Player<Role>) this);
 
         this.meta().clear();
 

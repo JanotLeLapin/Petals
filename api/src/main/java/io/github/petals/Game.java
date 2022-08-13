@@ -6,10 +6,12 @@ import java.util.Set;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitTask;
 
+import io.github.petals.role.Role;
+
 /** Reference to a game stored in the database */
 public interface Game {
     /** Reference to a player stored in the database */
-    public static interface Player {
+    public static interface Player<T extends Role> {
         /** @return the universally unique identifier of this player */
         public String uniqueId();
         /** @return whether this handle references a valid player in the database */
@@ -20,6 +22,14 @@ public interface Game {
         public OfflinePlayer player();
         /** @return the custom metadata of this player */
         public Map<String, String> meta();
+        /** @return the role for this player. If your games doesn't depend on roles this might be null */
+        public T role();
+        /**
+         * Updates the role for this player
+         *
+         * @param role The role class to link to this player
+         */
+        public void role(Class<? extends Role> role);
         /** Removes the player from his game, then deletes him from the database */
         public void delete();
     }
@@ -84,23 +94,40 @@ public interface Game {
     public void delete();
     // Players
     /** @return the player hosting this game */
-    public Player host();
+    public Player<Role> host();
     /** @return every player in this game */
-    public Set<Player> players();
+    public Set<Player<Role>> players();
     /**
      * Finds a player stored in the database from its ID. Although never null, it may not exist
      *
      * @param uniqueId The player ID to lookup
      * @return The player handle
      */
-    public Player player(String uniqueId);
+    public Player<Role> player(String uniqueId);
+    /**
+     * Finds each player stored in the database with given role
+     *
+     * @param <T> The role type
+     * @param role The role class to match
+     * @return A set of player handles
+     */
+    public <T extends Role> Set<Player<T>> players(Class<T> role);
+    /**
+     * Finds a player stored in the database from ID and role. Although never null, it may not exist
+     *
+     * @param <T> The role type
+     * @param uniqueId The player ID to lookup
+     * @param role The role class to match
+     * @return The player handle
+     */
+    public <T extends Role> Player<T> player(String uniqueId, Class<T> role);
     /**
      * Creates a player on the database and links it to this game
      *
      * @param uniqueId The player ID
      * @return The player handle
      */
-    public Player addPlayer(String uniqueId);
+    public Player<Role> addPlayer(String uniqueId);
     // Worlds
     /** @return every world in this game */
     public Set<World> worlds();

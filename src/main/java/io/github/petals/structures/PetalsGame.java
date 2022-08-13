@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import io.github.petals.Game;
 import io.github.petals.Petal;
 import io.github.petals.PetalsPlugin;
+import io.github.petals.role.Role;
 import redis.clients.jedis.JedisPooled;
 
 public class PetalsGame implements Game {
@@ -69,23 +70,41 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public Player host() {
-        return new PetalsPlayer(pooled.hget(this.uniqueId, "host"), pooled);
+    public Player<Role> host() {
+        return new PetalsPlayer<Role>(pooled.hget(this.uniqueId, "host"), pooled);
     }
 
     @Override
-    public Set<Player> players() {
+    public Set<Player<Role>> players() {
         Set<String> playerIds = pooled.smembers(this.uniqueId + ":players");
         return playerIds.stream().map(id -> this.player(id)).collect(Collectors.toSet());
     }
 
     @Override
-    public Player player(String uniqueId) {
-        return new PetalsPlayer(uniqueId, pooled);
+    public Player<Role> player(String uniqueId) {
+        return new PetalsPlayer<Role>(uniqueId, pooled);
     }
 
     @Override
-    public Player addPlayer(String uniqueId) {
+    public <T extends Role> Set<Player<T>> players(Class<T> role) {
+        return pooled
+            .smembers(this.uniqueId + ":players")
+            .stream()
+            .filter(player -> {
+                String r = pooled.hget(player, "role");
+                return r == null ? false : r.equals(role.getName());
+            })
+            .map(id -> new PetalsPlayer<T>(id, pooled))
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    public <T extends Role> Player<T> player(String uniqueId, Class<T> role) {
+        return new PetalsPlayer<T>(uniqueId, pooled);
+    }
+
+    @Override
+    public Player<Role> addPlayer(String uniqueId) {
         return PetalsPlugin.petals().createPlayer(uniqueId, this.uniqueId);
     }
 
