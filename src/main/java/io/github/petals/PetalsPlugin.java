@@ -1,8 +1,10 @@
 package io.github.petals;
 
+import java.io.WriteAbortedException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -83,23 +85,27 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     }
 
     @Override
-    public Player<Role> player(String uniqueId) {
-        return new PetalsPlayer<Role>(uniqueId, pooled);
+    public Optional<Player<Role>> player(String uniqueId) {
+        PetalsPlayer<Role> p = new PetalsPlayer<>(uniqueId, pooled);
+        return p.exists() ? Optional.of(p) : Optional.empty();
     }
 
     @Override
-    public Player<Role> player(org.bukkit.entity.Player player) {
-        return new PetalsPlayer<Role>(player.getUniqueId().toString(), pooled);
+    public Optional<Player<Role>> player(org.bukkit.entity.Player player) {
+        PetalsPlayer<Role> p = new PetalsPlayer<>(player.getUniqueId().toString(), pooled);
+        return p.exists() ? Optional.of(p) : Optional.empty();
     }
 
     @Override
-    public World world(String name) {
-        return new PetalsWorld(name, pooled);
+    public Optional<World> world(String name) {
+        World w = new PetalsWorld(name, pooled);
+        return w.exists() ? Optional.of(w) : Optional.empty();
     }
 
     @Override
-    public World world(org.bukkit.World world) {
-        return new PetalsWorld(world.getName(), pooled);
+    public Optional<World> world(org.bukkit.World world) {
+        World w = new PetalsWorld(world.getName(), pooled);
+        return w.exists() ? Optional.of(w) : Optional.empty();
     }
 
     @Override
@@ -131,16 +137,18 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
                     executor = new EventExecutor() {
                         @Override
                         public void execute(Listener _listener, Event event) throws EventException {
-                            Game game;
-                            if (event instanceof BlockEvent) game = world(((BlockEvent) event).getBlock().getWorld()).game();
-                            else if (event instanceof EntityEvent) game = world(((EntityEvent) event).getEntity().getWorld()).game();
-                            else if (event instanceof InventoryEvent) game = player(((InventoryEvent) event).getView().getPlayer().getUniqueId().toString()).game();
-                            else if (event instanceof PlayerEvent) game = player(((PlayerEvent) event).getPlayer()).game();
-                            else if (event instanceof VehicleEvent) game = world(((VehicleEvent) event).getVehicle().getWorld()).game();
-                            else if (event instanceof WeatherEvent) game = world(((WeatherEvent) event).getWorld()).game();
-                            else if (event instanceof WorldEvent) game = world(((WorldEvent) event).getWorld()).game();
+                            Optional<World> world = Optional.empty();
+                            if (event instanceof BlockEvent) world = world(((BlockEvent) event).getBlock().getWorld());
+                            else if (event instanceof EntityEvent) world = world(((EntityEvent) event).getEntity().getWorld());
+                            else if (event instanceof InventoryEvent) world = world(((InventoryEvent) event).getView().getPlayer().getWorld());
+                            else if (event instanceof PlayerEvent) world = world(((PlayerEvent) event).getPlayer().getWorld());
+                            else if (event instanceof VehicleEvent) world = world(((VehicleEvent) event).getVehicle().getWorld());
+                            else if (event instanceof WeatherEvent) world = world(((WeatherEvent) event).getWorld());
+                            else if (event instanceof WorldEvent) world = world(((WorldEvent) event).getWorld());
                             else return;
+                            if (!world.isPresent()) return;
 
+                            final Game game = world.get().game();
                             if (!game.exists() || !game.plugin().equals(plugin)) return;
 
                             try {

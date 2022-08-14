@@ -1,5 +1,6 @@
 package io.github.petals.structures;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,12 +78,13 @@ public class PetalsGame implements Game {
     @Override
     public Set<Player<Role>> players() {
         Set<String> playerIds = pooled.smembers(this.uniqueId + ":players");
-        return playerIds.stream().map(id -> this.player(id)).collect(Collectors.toSet());
+        return playerIds.stream().map(id -> this.player(id).get()).collect(Collectors.toSet());
     }
 
     @Override
-    public Player<Role> player(String uniqueId) {
-        return new PetalsPlayer<Role>(uniqueId, pooled);
+    public Optional<Player<Role>> player(String uniqueId) {
+        PetalsPlayer<Role> p = new PetalsPlayer<>(uniqueId, pooled);
+        return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
     }
 
     @Override
@@ -99,8 +101,9 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public <T extends Role> Player<T> player(String uniqueId, Class<T> role) {
-        return new PetalsPlayer<T>(uniqueId, pooled);
+    public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role) {
+        PetalsPlayer<T> p = new PetalsPlayer<>(uniqueId, pooled);
+        return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
     }
 
     @Override

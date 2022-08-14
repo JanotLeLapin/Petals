@@ -37,6 +37,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                 game = Petals
                     .petals()
                     .player(((Player) sender).getUniqueId().toString())
+                    .get()
                     .game();
             } else {
                 game = Petals

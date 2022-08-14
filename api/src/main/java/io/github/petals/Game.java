@@ -1,6 +1,7 @@
 package io.github.petals;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.OfflinePlayer;
@@ -103,7 +104,7 @@ public interface Game {
      * @param uniqueId The player ID to lookup
      * @return The player handle
      */
-    public Player<Role> player(String uniqueId);
+    public Optional<Player<Role>> player(String uniqueId);
     /**
      * Finds each player stored in the database with given role
      *
@@ -120,7 +121,7 @@ public interface Game {
      * @param role The role class to match
      * @return The player handle
      */
-    public <T extends Role> Player<T> player(String uniqueId, Class<T> role);
+    public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role);
     /**
      * Creates a player on the database and links it to this game
      *

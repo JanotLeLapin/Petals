@@ -1,5 +1,6 @@
 package io.github.petals;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -21,33 +22,33 @@ public interface Petals extends Plugin {
     public Set<Game> games();
 
     /**
-     * Finds a player stored in the database from its ID. Although never null, it may not exist
+     * Finds a player stored in the database from its ID
      *
      * @param uniqueId The player ID to lookup
      * @return The player handle
      */
-    public Player<Role> player(String uniqueId);
+    public Optional<Player<Role>> player(String uniqueId);
     /**
-     * Finds a player stored in the database from a Bukkit Player instance. Although never null, it may not exist
+     * Finds a player stored in the database from a Bukkit Player instance
      *
-     * @param player The player ID to lookup
+     * @param player The Bukkit object
      * @return The player handle
      */
-    public Player<Role> player(org.bukkit.entity.Player player);
+    public Optional<Player<Role>> player(org.bukkit.entity.Player player);
     /**
-     * Finds a world stored in the database from its name. Although never null, it may not exist
+     * Finds a world stored in the database from its name
      *
      * @param name The world name to lookup
      * @return The world handle
      */
-    public World world(String name);
+    public Optional<World> world(String name);
     /**
-     * Finds a world stored in the database from a Bukkit World instance. Although never null, it may not exist
+     * Finds a world stored in the database from a Bukkit World instance
      *
-     * @param world The world name to lookup
+     * @param world The Bukkit object
      * @return The world handle
      */
-    public World world(org.bukkit.World world);
+    public Optional<World> world(org.bukkit.World world);
 
     /**
      * Listens for events
