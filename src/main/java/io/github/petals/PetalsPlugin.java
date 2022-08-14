@@ -1,12 +1,14 @@
 package io.github.petals;
 
-import java.io.WriteAbortedException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -15,6 +17,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -32,7 +35,6 @@ import io.github.petals.event.GameListener;
 import io.github.petals.role.Role;
 import io.github.petals.structures.PetalsGame;
 import io.github.petals.structures.PetalsPlayer;
-import io.github.petals.structures.PetalsScheduler;
 import io.github.petals.structures.PetalsWorld;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -108,6 +110,30 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         return w.exists() ? Optional.of(w) : Optional.empty();
     }
 
+    private EventExecutor lambdaToExecutor(Function<Event, Optional<World>> lambda, BiConsumer<World, Event> callback) {
+        return new EventExecutor() {
+            @Override
+            public void execute(Listener listener, Event event) throws EventException {
+                lambda.apply(event).ifPresent(world -> callback.accept(world, event));
+            }
+        };
+    }
+
+    private EventExecutor classToExecutor(Class<Event> clazz, BiConsumer<World, Event> callback) {
+        // Find appropriate executor from Event class at load time to save performance
+        if (BlockEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((BlockEvent) event).getBlock().getWorld()), callback);
+        else if (EntityEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((EntityEvent) event).getEntity().getWorld()), callback);
+        else if (InventoryEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((InventoryEvent) event).getView().getPlayer().getWorld()), callback);
+        else if (PlayerEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((PlayerEvent) event).getPlayer().getWorld()), callback);
+        else if (VehicleEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((VehicleEvent) event).getVehicle().getWorld()), callback);
+        else if (WeatherEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((WeatherEvent) event).getWorld()), callback);
+        else if (WorldEvent.class.isAssignableFrom(clazz)) return lambdaToExecutor(event -> world(((WorldEvent) event).getWorld()), callback);
+
+        this.getLogger().info(String.format("Unsupported Event: \"%s\". This Event will not fire a GameListener handler.", clazz.getName()));
+
+        return null;
+    }
+
     @Override
     public void registerEvents(GameListener listener, Petal plugin) {
         Method[] handlers = listener.getClass().getDeclaredMethods();
@@ -118,6 +144,8 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
             if (annotation == null
                 || handler.getParameterCount() < 1
                 || !Event.class.isAssignableFrom(handler.getParameterTypes()[0])) continue;
+
+            Class<Event> eventClass = (Class<Event>) handler.getParameterTypes()[0];
 
             EventExecutor executor;
             switch (handler.getParameterCount()) {
@@ -134,37 +162,25 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
                     };
                     break;
                 case 2:
-                    executor = new EventExecutor() {
-                        @Override
-                        public void execute(Listener _listener, Event event) throws EventException {
-                            Optional<World> world = Optional.empty();
-                            if (event instanceof BlockEvent) world = world(((BlockEvent) event).getBlock().getWorld());
-                            else if (event instanceof EntityEvent) world = world(((EntityEvent) event).getEntity().getWorld());
-                            else if (event instanceof InventoryEvent) world = world(((InventoryEvent) event).getView().getPlayer().getWorld());
-                            else if (event instanceof PlayerEvent) world = world(((PlayerEvent) event).getPlayer().getWorld());
-                            else if (event instanceof VehicleEvent) world = world(((VehicleEvent) event).getVehicle().getWorld());
-                            else if (event instanceof WeatherEvent) world = world(((WeatherEvent) event).getWorld());
-                            else if (event instanceof WorldEvent) world = world(((WorldEvent) event).getWorld());
-                            else return;
-                            if (!world.isPresent()) return;
-
-                            final Game game = world.get().game();
-                            if (!game.exists() || !game.plugin().equals(plugin)) return;
-
+                    executor = classToExecutor(eventClass, (world, event) -> {
+                        final Game game = world.game();
+                        if (game.exists() && game.plugin().getName().equals(plugin.getName())) {
                             try {
                                 handler.invoke(listener, event, game);
                             } catch (InvocationTargetException | IllegalAccessException e) {
                                 e.printStackTrace();
                             }
                         }
-                    };
+                    });
+                    if (executor == null) return;
+
                     break;
                 default:
                     continue;
             }
 
             this.getServer().getPluginManager().registerEvent(
-                (Class<Event>) handler.getParameterTypes()[0],
+                eventClass,
                 listener,
                 annotation.priority(),
                 executor,
