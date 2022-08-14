@@ -128,7 +128,7 @@ public interface Game {
      * @param uniqueId The player ID
      * @return The player handle
      */
-    public Player<Role> addPlayer(String uniqueId);
+    public Player<Role> addPlayer(String uniqueId) throws IllegalStateException;
     // Worlds
     /** @return every world in this game */
     public Set<World> worlds();
@@ -145,6 +145,6 @@ public interface Game {
      * @param name The world name
      * @return The world handle
      */
-    public World addWorld(String name);
+    public World addWorld(String name) throws IllegalStateException;
 }
 

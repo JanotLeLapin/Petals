@@ -65,6 +65,6 @@ public interface Petals extends Plugin {
      * @param plugin The plugin responsible for this game
      * @return The game
      */
-    public Game createGame(String host, Petal plugin);
+    public Game createGame(String host, Petal plugin) throws IllegalStateException;
 }
 

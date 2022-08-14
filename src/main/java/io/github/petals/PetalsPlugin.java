@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -191,8 +189,12 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
     }
 
     @Override
-    public Game createGame(String host, Petal plugin) {
+    public Game createGame(String host, Petal plugin) throws IllegalStateException {
         String uniqueId = UUID.randomUUID().toString();
+
+        // Add player
+        Player<Role> p = createPlayer(host, uniqueId);
+        plugin.onAddPlayer(p);
 
         // Create game
         HashMap<String, String> map = new HashMap<>();
@@ -202,21 +204,27 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         pooled.hset(uniqueId, map);
         pooled.sadd("games", uniqueId);
 
-        createPlayer(host, uniqueId);
-
         Game game = new PetalsGame(uniqueId, pooled);
         plugin.onCreateGame(game);
         return game;
     }
 
-    public World createWorld(String name, String game) {
+    public World createWorld(String name, String game) throws IllegalStateException {
+        if (pooled.sismember("worlds", name)) {
+            throw new IllegalStateException(String.format("World with ID: \"%s\" already present", name));
+        }
+
         pooled.hset("worlds", name, game);
         pooled.sadd(game + ":worlds", name);
 
         return new PetalsWorld(name, pooled);
     }
 
-    public <T extends Role> Player<T> createPlayer(String player, String game) {
+    public Player<Role> createPlayer(String player, String game) throws IllegalStateException {
+        if (pooled.sismember("players", player)) {
+            throw new IllegalStateException(String.format("Player with ID: \"%s\" already present", player));
+        };
+
         HashMap<String, String> map = new HashMap<>();
         map.put("game", game);
         pooled.hset(player, map);
@@ -224,8 +232,7 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
         pooled.sadd(game + ":players", player);
         pooled.sadd("players", player);
 
-        Player<T> p = new PetalsPlayer<>(player, pooled);
-        p.game().plugin().onAddPlayer((Player<Role>) p);
+        Player<Role> p = new PetalsPlayer<>(player, pooled);
         return p;
     }
 }

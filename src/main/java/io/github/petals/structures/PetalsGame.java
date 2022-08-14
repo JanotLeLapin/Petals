@@ -107,8 +107,10 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public Player<Role> addPlayer(String uniqueId) {
-        return PetalsPlugin.petals().createPlayer(uniqueId, this.uniqueId);
+    public Player<Role> addPlayer(String uniqueId) throws IllegalStateException {
+        Player<Role> p = PetalsPlugin.petals().createPlayer(uniqueId, this.uniqueId);
+        this.plugin().onAddPlayer(p);
+        return p;
     }
 
     @Override
@@ -123,7 +125,7 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public World addWorld(String name) {
+    public World addWorld(String name) throws IllegalStateException {
         return PetalsPlugin.petals().createWorld(name, this.uniqueId);
     }
 }
