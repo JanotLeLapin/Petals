@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
@@ -56,6 +57,21 @@ public class PetalsDatabaseTest extends TestUtil {
         Game g4b = db.createGame("host4b", plugin);
         g4a.addPlayer("player4a");
         assertThrows(IllegalStateException.class, () -> g4b.addPlayer("player4a"));
+    }
+
+    @Test
+    public void customImplementation() {
+        // Add metadata property to game host when created
+        doAnswer(i ->
+            i.getArgument(0, Game.class).host().meta().put("foo", "bar")
+        ).when(plugin).onCreateGame(any());
+        Game g1 = petals.database().createGame("host1", plugin);
+        assertEquals("bar", g1.host().meta().get("foo"));
+
+        // Do nothing when game created
+        doNothing().when(plugin).onCreateGame(any());
+        Game g2 = petals.database().createGame("host2", plugin);
+        assertNull(g2.host().meta().get("foo"));
     }
 }
 
