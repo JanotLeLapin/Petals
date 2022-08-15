@@ -25,7 +25,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             final Plugin plugin = Bukkit.getPluginManager().getPlugin(args[1]);
             if (plugin == null || !(plugin instanceof Petal)) return false;
 
-            Game game = PetalsPlugin.petals().createGame(((Player) sender).getUniqueId().toString(), (Petal) plugin);
+            Game game = PetalsPlugin.petals().database().createGame(((Player) sender).getUniqueId().toString(), (Petal) plugin);
             game.addWorld("world");
 
             return true;
@@ -36,12 +36,14 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             if (args.length < 2) {
                 game = Petals
                     .petals()
+                    .database()
                     .player(((Player) sender).getUniqueId().toString())
                     .get()
                     .game();
             } else {
                 game = Petals
                     .petals()
+                    .database()
                     .games()
                     .stream()
                     .filter(g -> g.uniqueId().equals(args[1]))
@@ -98,6 +100,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                 } else {
                     List<String> games = Petals
                         .petals()
+                        .database()
                         .games()
                         .stream()
                         .map(game -> game.uniqueId())
