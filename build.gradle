@@ -26,8 +26,21 @@ allprojects {
     }
 }
 
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
 dependencies {
     implementation 'redis.clients:jedis:4.2.3'
     implementation project(':api')
+
+    testImplementation 'org.mockito:mockito-inline:4.7.+'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.+'
+    testImplementation 'org.testcontainers:testcontainers:1.17.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.17.3'
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
