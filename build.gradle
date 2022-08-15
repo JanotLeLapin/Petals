@@ -10,6 +10,12 @@ version = '0.1'
 allprojects {
     apply plugin: 'java'
 
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(8))
+        }
+    }
+
     repositories {
         mavenCentral()
         maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots' }
@@ -21,7 +27,6 @@ allprojects {
     }
 
     tasks.withType(JavaCompile) {
-        options.release = 8
         options.encoding = 'UTF-8'
     }
 }
