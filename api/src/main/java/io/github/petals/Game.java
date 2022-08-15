@@ -99,7 +99,7 @@ public interface Game {
     /** @return every player in this game */
     public Set<Player<Role>> players();
     /**
-     * Finds a player stored in the database from its ID. Although never null, it may not exist
+     * Finds a player stored in the database from its ID
      *
      * @param uniqueId The player ID to lookup
      * @return The player handle
@@ -114,7 +114,7 @@ public interface Game {
      */
     public <T extends Role> Set<Player<T>> players(Class<T> role);
     /**
-     * Finds a player stored in the database from ID and role. Although never null, it may not exist
+     * Finds a player stored in the database from ID and role
      *
      * @param <T> The role type
      * @param uniqueId The player ID to lookup
@@ -133,7 +133,7 @@ public interface Game {
     /** @return every world in this game */
     public Set<World> worlds();
     /**
-     * Finds a world stored in the database from its name. Although never null, it may not exist
+     * Finds a world stored in the database from its name
      *
      * @param name The world name to lookup
      * @return The world handle
