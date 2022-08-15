@@ -30,6 +30,15 @@ public interface Database {
      */
     public Optional<Player<Role>> player(org.bukkit.entity.Player player);
     /**
+     * Finds a player stored in the database from ID and role
+     *
+     * @param <T> The role type
+     * @param uniqueId The player ID to lookup
+     * @param role The role class to match
+     * @return The player handle
+     */
+    public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role);
+    /**
      * Finds a world stored in the database from its name
      *
      * @param name The world name to lookup
