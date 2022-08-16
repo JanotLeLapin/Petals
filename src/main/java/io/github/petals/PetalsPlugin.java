@@ -113,10 +113,12 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
                     executor = new EventExecutor() {
                         @Override
                         public void execute(Listener _listener, Event event) throws EventException {
-                            try {
-                                handler.invoke(listener, event);
-                            } catch (InvocationTargetException | IllegalAccessException e) {
-                                e.printStackTrace();
+                            if (eventClass.isAssignableFrom(event.getClass())) {
+                                try {
+                                    handler.invoke(listener, event);
+                                } catch (InvocationTargetException | IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     };
@@ -124,7 +126,7 @@ public class PetalsPlugin extends JavaPlugin implements Petals {
                 case 2:
                     executor = classToExecutor(eventClass, (world, event) -> {
                         final Game game = world.game();
-                        if (game.exists() && game.plugin().getName().equals(plugin.getName())) {
+                        if (eventClass.isAssignableFrom(event.getClass()) && game.exists() && game.plugin().getName().equals(plugin.getName())) {
                             try {
                                 handler.invoke(listener, event, game);
                             } catch (InvocationTargetException | IllegalAccessException e) {
