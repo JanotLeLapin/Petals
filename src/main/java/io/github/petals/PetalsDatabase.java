@@ -74,7 +74,6 @@ public class PetalsDatabase implements Database {
 
         // Add player
         Player<Role> p = createPlayer(host, uniqueId);
-        plugin.onAddPlayer(p);
 
         // Create game
         HashMap<String, String> map = new HashMap<>();
@@ -86,6 +85,7 @@ public class PetalsDatabase implements Database {
 
         Game game = new PetalsGame(uniqueId, pooled);
         plugin.onCreateGame(game);
+        plugin.onAddPlayer(p);
         return game;
     }
 
