@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import io.github.petals.role.Role;
@@ -20,7 +19,7 @@ public interface Game {
         /** @return the game linked to this player */
         public Game game();
         /** @return the Bukkit representation of this player */
-        public OfflinePlayer player();
+        public Optional<org.bukkit.entity.Player> player();
         /** @return the custom metadata of this player */
         public Map<String, String> meta();
         /** @return the role for this player. If your games doesn't depend on roles this might be null */

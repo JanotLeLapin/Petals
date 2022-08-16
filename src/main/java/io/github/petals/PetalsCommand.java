@@ -3,6 +3,7 @@ package io.github.petals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -61,7 +62,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(new String[] {
                         String.format("Game ID: %s", game.uniqueId()),
                         String.format("Player count: %d", game.players().size()),
-                        String.format("Host: %s", game.host().player().getName()),
+                        String.format("Host: %s", game.host().player().map(host -> host.getName()).orElseGet(game.host()::uniqueId)),
                         String.format("Seconds elapsed: %d", game.ticks() / 20),
                         String.format("Plugin: %s", game.plugin().getName()),
                         String.format("Status: %s", game.running() ? "running" : "creating"),

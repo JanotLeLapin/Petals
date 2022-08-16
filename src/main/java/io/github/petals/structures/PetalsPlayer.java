@@ -2,10 +2,11 @@ package io.github.petals.structures;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import io.github.petals.Game;
 import io.github.petals.Metadata;
@@ -38,8 +39,9 @@ public class PetalsPlayer<T extends Role> implements Game.Player<T> {
     }
 
     @Override
-    public OfflinePlayer player() {
-        return Bukkit.getOfflinePlayer(UUID.fromString(this.uniqueId));
+    public Optional<Player> player() {
+        Player p = Bukkit.getPlayer(UUID.fromString(this.uniqueId));
+        return p == null ? Optional.empty() : Optional.of(p);
     }
 
     @Override
