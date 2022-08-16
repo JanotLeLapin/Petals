@@ -3,7 +3,6 @@ package io.github.petals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -55,8 +54,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
 
             switch (args[0]) {
                 case "start":
-                    // TODO: Start game
-                    game.plugin().onStartGame(game);
+                    game.start();
                     return true;
                 case "get":
                     sender.sendMessage(new String[] {
@@ -69,8 +67,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                     });
                     return true;
                 case "stop":
-                    // TODO: Start game
-                    game.plugin().onStopGame(game);
+                    game.stop();
                     return true;
             }
         }

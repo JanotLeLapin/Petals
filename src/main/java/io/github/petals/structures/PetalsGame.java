@@ -40,7 +40,7 @@ public class PetalsGame implements Game {
     public long ticks() {
         return running()
             ? Bukkit.getWorlds().get(0).getFullTime() - Long.parseLong(pooled.hget(this.uniqueId, "start"))
-            : 0;
+            : -1;
     }
 
     @Override
@@ -127,6 +127,20 @@ public class PetalsGame implements Game {
     @Override
     public World addWorld(String name) throws IllegalStateException {
         return PetalsPlugin.petals().database().createWorld(name, this.uniqueId);
+    }
+
+    @Override
+    public void start() throws IllegalStateException {
+        if (this.running()) throw new IllegalStateException(String.format("Game %s already running", this.uniqueId()));
+        pooled.hset(this.uniqueId(), "start", String.valueOf(Bukkit.getWorlds().get(0).getFullTime()));
+        this.plugin().onStartGame(this);
+    }
+
+    @Override
+    public void stop() throws IllegalStateException {
+        if (!this.running()) throw new IllegalStateException(String.format("Game %s is not running", this.uniqueId()));
+        this.plugin().onStopGame(this);
+        this.delete();
     }
 }
 
