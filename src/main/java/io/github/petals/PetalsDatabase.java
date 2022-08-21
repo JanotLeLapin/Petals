@@ -90,7 +90,7 @@ public class PetalsDatabase implements Database {
     }
 
     public World createWorld(String name, String game) throws IllegalStateException {
-        if (pooled.sismember("worlds", name)) {
+        if (pooled.hexists("worlds", name)) {
             throw new IllegalStateException(String.format("World with ID: \"%s\" already present", name));
         }
 

@@ -25,8 +25,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             final Plugin plugin = Bukkit.getPluginManager().getPlugin(args[1]);
             if (plugin == null || !(plugin instanceof Petal)) return false;
 
-            Game game = PetalsPlugin.petals().database().createGame(((Player) sender).getUniqueId().toString(), (Petal) plugin);
-            game.addWorld("world");
+            PetalsPlugin.petals().database().createGame(((Player) sender).getUniqueId().toString(), (Petal) plugin);
 
             return true;
         }
