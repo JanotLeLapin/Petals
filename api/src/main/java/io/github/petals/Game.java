@@ -145,9 +145,7 @@ public interface Game {
      * @return The world handle
      */
     public World addWorld(String name) throws IllegalStateException;
-    /** Starts this Game, throws an {@link IllegalStateException} if the Game is already running */
-    public void start() throws IllegalStateException;
-    /** Stops this Game, throws an {@link IllegalStateException} if the Game is not running */
-    public void stop() throws IllegalStateException;
+    /** Resets the ticks for this game */
+    public void start();
 }
 

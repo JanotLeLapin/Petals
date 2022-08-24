@@ -56,6 +56,8 @@ public class PetalsGame implements Game {
 
     @Override
     public void delete() {
+        plugin().onDeleteGame(this);
+
         // Delete players
         this.players().forEach(player -> player.delete());
         // Delete worlds
@@ -130,17 +132,9 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public void start() throws IllegalStateException {
-        if (this.running()) throw new IllegalStateException(String.format("Game %s already running", this.uniqueId()));
-        pooled.hset(this.uniqueId(), "start", String.valueOf(Bukkit.getWorlds().get(0).getFullTime()));
+    public void start() {
         this.plugin().onStartGame(this);
-    }
-
-    @Override
-    public void stop() throws IllegalStateException {
-        if (!this.running()) throw new IllegalStateException(String.format("Game %s is not running", this.uniqueId()));
-        this.plugin().onStopGame(this);
-        this.delete();
+        pooled.hset(this.uniqueId(), "start", String.valueOf(Bukkit.getWorlds().get(0).getFullTime()));
     }
 }
 

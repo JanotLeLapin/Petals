@@ -20,11 +20,11 @@ public interface Petal extends Plugin {
      */
     public void onStartGame(Game game);
     /**
-     * Executed when a game is stopped
+     * Executed when a game is being deleted
      *
      * @param game The game
      */
-    public void onStopGame(Game game);
+    public void onDeleteGame(Game game);
 
     /**
      * Executed when a player is added to a game

@@ -30,7 +30,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args[0].equals("start") || args[0].equals("get") || args[0].equals("stop")) {
+        if (args[0].equals("start") || args[0].equals("get") || args[0].equals("delete")) {
             final Game game;
             if (args.length < 2) {
                 game = Petals
@@ -65,8 +65,8 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                         String.format("Status: %s", game.running() ? "running" : "creating"),
                     });
                     return true;
-                case "stop":
-                    game.stop();
+                case "delete":
+                    game.delete();
                     return true;
             }
         }
@@ -82,7 +82,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                 completions.add("create");
                 completions.add("start");
                 completions.add("get");
-                completions.add("stop");
+                completions.add("delete");
                 break;
             case 2:
                 if (args[0].equals("create")) {
