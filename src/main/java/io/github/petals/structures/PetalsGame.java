@@ -1,5 +1,6 @@
 package io.github.petals.structures;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -7,6 +8,7 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 
 import io.github.petals.Game;
+import io.github.petals.Metadata;
 import io.github.petals.Petal;
 import io.github.petals.PetalsPlugin;
 import io.github.petals.role.Role;
@@ -29,6 +31,11 @@ public class PetalsGame implements Game {
     @Override
     public boolean exists() {
         return this.uniqueId == null ? false : pooled.sismember("games", this.uniqueId);
+    }
+
+    @Override
+    public Map<String, String> meta() {
+        return new Metadata(this.uniqueId + ":meta", this.pooled);
     }
 
     @Override
@@ -96,7 +103,12 @@ public class PetalsGame implements Game {
             .stream()
             .filter(player -> {
                 String r = pooled.hget(player, "role");
-                return r == null ? false : r.equals(role.getName());
+                try {
+                    Class<?> playerRole = Class.forName(r);
+                    return role.isAssignableFrom(playerRole);
+                } catch (ClassNotFoundException e) {
+                    return false;
+                }
             })
             .map(id -> new PetalsPlayer<T>(id, pooled))
             .collect(Collectors.toSet());

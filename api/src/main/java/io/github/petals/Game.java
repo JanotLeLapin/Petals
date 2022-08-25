@@ -82,6 +82,8 @@ public interface Game {
     public String uniqueId();
     /** @return whether this handle references a valid game in the database */
     public boolean exists();
+    /** @return the custom metadata of this game */
+    public Map<String, String> meta();
     /** @return whether the game has started yet */
     public boolean running();
     /** @return the amount of ticks that elapsed since the game started */
