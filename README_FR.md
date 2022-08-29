@@ -41,7 +41,7 @@ docker exec -it redis redis-cli
 Pour utiliser Petals dans vos plugins, vous devez [compiler le code source](#compiler-le-code-source) puis publier l'API Petals sur votre répertoire local Maven.
 
 ```sh
-gradlew.bar publishToMavenLocal # Windows
+gradlew.bat publishToMavenLocal # Windows
 ./gradlew shadowJar # MacOS & Linux
 ```
 

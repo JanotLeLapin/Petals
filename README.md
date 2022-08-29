@@ -28,7 +28,7 @@ You'll need [Docker](https://www.docker.com/) to run your instance of a Redis st
 docker run --name redis -p6379:6379 -d redis:alpine
 ```
 
-You may also manually interact with Redis through Redis CLI, although I would not recommend doing so unless you exacly know what you're doing.
+You may also manually interact with Redis through Redis CLI, although I would not recommend doing so unless you know exactly what you're doing.
 
 ```sh
 docker exec -it redis redis-cli
@@ -41,7 +41,7 @@ docker exec -it redis redis-cli
 To use Petals in your plugins, you'll need to [compile the sources](#compiling-sources) and publish the Petals API to your local maven registry.
 
 ```sh
-gradlew.bar publishToMavenLocal # Windows
+gradlew.bat publishToMavenLocal # Windows
 ./gradlew shadowJar # MacOS & Linux
 ```
 
@@ -65,7 +65,7 @@ depend: [Petals]
 
 ### Declaring a Petals plugin
 
-To allow the Petals plugin to recognize your plugin, your main class should implement the `Petal` interface. Here's an example main class for a Petals plugin:
+To allow the Petals plugin to recognize your plugin, your main class should implement the `Petal` interface. Here's an example:
 
 ```java
 import org.bukkit.plugin.java.JavaPlugin;
@@ -108,7 +108,7 @@ public interface MyRole extends Role {
 }
 ```
 
-Petals makes it less verbose and error-prone to interact with the player's metadata.
+The Petals API makes interacting with the player's metadata more concise and makes errors occur less often.
 
 Please keep in mind:
 
