@@ -80,7 +80,7 @@ public class PetalsPlayer<T extends Role> implements Game.Player<T> {
                         }
 
                         final RoleMeta meta = method.getDeclaredAnnotation(RoleMeta.class);
-                        final String key = meta.key().isEmpty() ? method.getName() : meta.key();
+                        final String key = meta.value().isEmpty() ? method.getName() : meta.value();
                         if (meta != null) {
                             if (method.getParameterCount() == 0) {
                                 final Class<?> returnType = method.getReturnType();
