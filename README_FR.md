@@ -87,3 +87,55 @@ public class MyMainClass extends JavaPlugin implements Petal {
 }
 ```
 
+### Déclarer un rôle Petals
+
+Avec Petals, les rôles sont des interfaces qui décrivent les métadonnées du joueur avec lequel elles sont associées. Petals les implémente, pas vous.
+
+Voici un exemple de rôle avec Petals:
+
+```java
+import io.github.petals.role.*;
+
+@RoleSpec(
+    name = "Mon Rôle",
+    description = "Un exemple de rôle"
+)
+public interface MyRole extends Role {
+    @RoleMeta
+    int blockBreakCount(); // Équivalent: Integer.parseInt(this.player().meta().getOrDefault("blockBreakCount", "0"))
+    @RoleMeta
+    void blockBreakCount(int blockBreakCount); // Équivalent: this.player().meta().put("blockBreakCount", String.valueOf(diamondCount))
+}
+```
+
+Petals rend les interactions avec les métadonnées du joueur moins risquées.
+
+Gardez à l'esprit:
+
+- Vous ne devriez jamais créer une instance d'un Role.
+- Vous ne devriez jamais implémenter un Role.
+- Chaque méthode dans un Role devrait avoir une annotation.
+- L'annotation `RoleMeta` ne supporte que les types suivants pour l'instant: `String`, `byte`, `short`, `int`, `long`, `float`, `double`, `boolean`, `? extends Enum`
+
+Maintenant qu'on a créé un Role, voyons comment on peut interagir avec à travers un Listener:
+
+```java
+public class MyListener implements Listener {
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent e) {
+        // Trouve un rôle qui hérite de MyRole
+        MyRole role = Petals.database().player(
+            e.getPlayer().getUniqueId().toString(),
+            MyRole.class
+        ).get();
+
+        // Augmente le compteur actuel d'une unité
+        int currentCount = role.blockBreakCount() + 1;
+        role.blockBreakCount(currentCount);
+
+        // Envoie un message au joueur
+        e.getPlayer().sendMessage("Tu as cassé " + currentCount + " blocs! Bien joué!");
+    }
+}
+```
+
