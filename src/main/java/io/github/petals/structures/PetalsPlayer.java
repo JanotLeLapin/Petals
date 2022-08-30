@@ -126,8 +126,9 @@ public class PetalsPlayer<T extends Role> implements Game.Player<T> {
     }
 
     @Override
-    public void role(Class<? extends Role> role) {
+    public <U extends Role> U role(Class<U> role) {
         this.pooled.hset(this.uniqueId, "role", role.getName());
+        return (U) this.role();
     }
 
     @Override

@@ -27,9 +27,11 @@ public interface Game {
         /**
          * Updates the role for this player
          *
+         * @param <U> The new role type
          * @param role The role class to link to this player
+         * @return An instance of the given role class
          */
-        public void role(Class<? extends Role> role);
+        public <U extends Role> U role(Class<U> role);
         /** Removes the player from his game, then deletes him from the database */
         public void delete();
     }
