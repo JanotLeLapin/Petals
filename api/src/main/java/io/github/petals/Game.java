@@ -100,13 +100,6 @@ public interface Game {
     /** @return every player in this game */
     public Set<Player<Role>> players();
     /**
-     * Finds a player stored in the database from its ID
-     *
-     * @param uniqueId The player ID to lookup
-     * @return The player handle
-     */
-    public Optional<Player<Role>> player(String uniqueId);
-    /**
      * Finds each player stored in the database with given role
      *
      * @param <T> The role type
@@ -115,7 +108,21 @@ public interface Game {
      */
     public <T extends Role> Set<Player<T>> players(Class<T> role);
     /**
-     * Finds a player stored in the database from ID and role
+     * Finds a player in this game from its ID
+     *
+     * @param uniqueId The player ID to lookup
+     * @return The player handle
+     */
+    public Optional<Player<Role>> player(String uniqueId);
+    /**
+     * Finds a player in this game from a Bukkit Player object
+     *
+     * @param player The Bukkit Player object
+     * @return The player handle
+     */
+    public Optional<Player<Role>> player(org.bukkit.entity.Player player);
+    /**
+     * Finds a player in this game from ID and role
      *
      * @param <T> The role type
      * @param uniqueId The player ID to lookup
@@ -124,12 +131,28 @@ public interface Game {
      */
     public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role);
     /**
+     * Finds a player in this game from a Bukkit Player object and a role
+     *
+     * @param <T> The role type
+     * @param player The Bukkit Player object
+     * @param role The role class to match
+     * @return The player handle
+     */
+    public <T extends Role> Optional<Player<T>> player(org.bukkit.entity.Player player, Class<T> role);
+    /**
      * Creates a player on the database and links it to this game
      *
      * @param uniqueId The player ID
      * @return The player handle
      */
     public Player<Role> addPlayer(String uniqueId) throws IllegalStateException;
+    /**
+     * Creates a player on the database and links it to this game
+     *
+     * @param player The Bukkit Player object
+     * @return The player handle
+     */
+    public Player<Role> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException;
     // Worlds
     /** @return every world in this game */
     public Set<World> worlds();

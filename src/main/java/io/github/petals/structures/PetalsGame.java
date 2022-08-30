@@ -91,12 +91,6 @@ public class PetalsGame implements Game {
     }
 
     @Override
-    public Optional<Player<Role>> player(String uniqueId) {
-        PetalsPlayer<Role> p = new PetalsPlayer<>(uniqueId, pooled);
-        return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
-    }
-
-    @Override
     public <T extends Role> Set<Player<T>> players(Class<T> role) {
         return pooled
             .smembers(this.uniqueId + ":players")
@@ -115,9 +109,25 @@ public class PetalsGame implements Game {
     }
 
     @Override
+    public Optional<Player<Role>> player(String uniqueId) {
+        PetalsPlayer<Role> p = new PetalsPlayer<>(uniqueId, pooled);
+        return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
+    }
+
+    @Override
+    public Optional<Player<Role>> player(org.bukkit.entity.Player player) {
+        return this.player(player.getUniqueId().toString());
+    }
+
+    @Override
     public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role) {
         PetalsPlayer<T> p = new PetalsPlayer<>(uniqueId, pooled);
         return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
+    }
+
+    @Override
+    public <T extends Role> Optional<Player<T>> player(org.bukkit.entity.Player player, Class<T> role) {
+        return this.player(player.getUniqueId().toString(), role);
     }
 
     @Override
@@ -125,6 +135,11 @@ public class PetalsGame implements Game {
         Player<Role> p = PetalsPlugin.petals().database().createPlayer(uniqueId, this.uniqueId);
         this.plugin().onAddPlayer(p);
         return p;
+    }
+
+    @Override
+    public Player<Role> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException {
+        return this.addPlayer(player.getUniqueId().toString());
     }
 
     @Override
