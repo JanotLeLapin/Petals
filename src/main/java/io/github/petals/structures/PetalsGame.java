@@ -11,6 +11,7 @@ import io.github.petals.Game;
 import io.github.petals.Metadata;
 import io.github.petals.Petal;
 import io.github.petals.PetalsPlugin;
+import io.github.petals.Util;
 import io.github.petals.role.Role;
 import redis.clients.jedis.JedisPooled;
 
@@ -94,15 +95,7 @@ public class PetalsGame extends PetalsBase implements Game {
         return pooled
             .smembers(this.uniqueId + ":players")
             .stream()
-            .filter(player -> {
-                String r = pooled.hget(player, "role");
-                try {
-                    Class<?> playerRole = Class.forName(r);
-                    return role.isAssignableFrom(playerRole);
-                } catch (ClassNotFoundException e) {
-                    return false;
-                }
-            })
+            .filter(player -> Util.isRoleAssignable(player, role, pooled))
             .map(id -> new PetalsPlayer<T>(id, pooled))
             .collect(Collectors.toSet());
     }
@@ -121,7 +114,10 @@ public class PetalsGame extends PetalsBase implements Game {
     @Override
     public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role) {
         PetalsPlayer<T> p = new PetalsPlayer<>(uniqueId, pooled);
-        return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
+        return
+            p.exists()
+            && Util.isRoleAssignable(uniqueId, role, pooled)
+            && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
     }
 
     @Override

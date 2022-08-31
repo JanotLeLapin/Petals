@@ -53,13 +53,12 @@ public class PetalsDatabase implements Database {
     @Override
     public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role) {
         PetalsPlayer<T> p = new PetalsPlayer<>(uniqueId, pooled);
-        return p.exists() ? Optional.of(p) : Optional.empty();
+        return p.exists() && Util.isRoleAssignable(uniqueId, role, pooled) ? Optional.of(p) : Optional.empty();
     }
 
     @Override
     public <T extends Role> Optional<Player<T>> player(org.bukkit.entity.Player player, Class<T> role) {
-        PetalsPlayer<T> p = new PetalsPlayer<>(player.getUniqueId().toString(), pooled);
-        return p.exists() ? Optional.of(p) : Optional.empty();
+        return this.player(player.getUniqueId().toString(), role);
     }
 
     @Override
