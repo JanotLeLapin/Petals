@@ -14,12 +14,11 @@ import io.github.petals.PetalsPlugin;
 import io.github.petals.role.Role;
 import redis.clients.jedis.JedisPooled;
 
-public class PetalsGame implements Game {
-    private String uniqueId;
-    private JedisPooled pooled;
+public class PetalsGame extends PetalsBase implements Game {
+    private final JedisPooled pooled;
 
-    public PetalsGame(String uniqueId, JedisPooled pooled) {
-        this.uniqueId = uniqueId;
+    public PetalsGame(final String uniqueId, final JedisPooled pooled) {
+        super(uniqueId);
         this.pooled = pooled;
     }
 
@@ -58,7 +57,7 @@ public class PetalsGame implements Game {
 
     @Override
     public Scheduler scheduler() {
-        return new PetalsScheduler(this.uniqueId, pooled);
+        return new PetalsScheduler(this, pooled);
     }
 
     @Override

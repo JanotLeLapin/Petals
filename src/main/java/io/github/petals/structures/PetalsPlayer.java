@@ -15,13 +15,12 @@ import io.github.petals.role.RoleMeta;
 import io.github.petals.role.RoleSpec;
 import redis.clients.jedis.JedisPooled;
 
-public class PetalsPlayer<T extends Role> implements Game.Player<T> {
-    private String uniqueId;
+public class PetalsPlayer<T extends Role> extends PetalsBase implements Game.Player<T> {
     private T role = null;
-    private JedisPooled pooled;
+    private final JedisPooled pooled;
 
-    public PetalsPlayer(String uniqueId, JedisPooled pooled) {
-        this.uniqueId = uniqueId;
+    public PetalsPlayer(final String uniqueId, JedisPooled pooled) {
+        super(uniqueId);
         this.pooled = pooled;
     }
 
