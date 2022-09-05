@@ -1,7 +1,5 @@
 package io.github.petals.structures;
 
-import java.lang.reflect.Proxy;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,13 +8,12 @@ import org.bukkit.entity.Player;
 
 import io.github.petals.Game;
 import io.github.petals.Metadata;
-import io.github.petals.role.Role;
-import io.github.petals.role.RoleMeta;
-import io.github.petals.role.RoleSpec;
+import io.github.petals.Util;
+import io.github.petals.state.PetalsState;
+import io.github.petals.state.State;
 import redis.clients.jedis.JedisPooled;
 
-public class PetalsPlayer<T extends Role> extends PetalsBase implements Game.Player<T> {
-    private T role = null;
+public class PetalsPlayer<T extends State<?>> extends PetalsBase implements Game.Player<T> {
     private final JedisPooled pooled;
 
     public PetalsPlayer(final String uniqueId, JedisPooled pooled) {
@@ -35,8 +32,8 @@ public class PetalsPlayer<T extends Role> extends PetalsBase implements Game.Pla
     }
 
     @Override
-    public Game game() {
-        return new PetalsGame(this.pooled.hget(this.uniqueId, "game"), pooled);
+    public Game<?> game() {
+        return new PetalsGame<>(this.pooled.hget(this.uniqueId, "game"), pooled);
     }
 
     @Override
@@ -46,95 +43,22 @@ public class PetalsPlayer<T extends Role> extends PetalsBase implements Game.Pla
     }
 
     @Override
-    public Map<String, String> meta() {
-        return new Metadata(this.uniqueId + ":meta", this.pooled);
+    public T state() {
+        return (T) Util.createState(this, pooled);
     }
 
     @Override
-    public T role() {
-        if (this.role != null) return this.role;
-
-        // Cache role
-        String roleClass = pooled.hget(uniqueId, "role");
-        if (roleClass != null) {
-            try {
-                final Class<?> role = Class.forName(pooled.hget(uniqueId, "role"));
-                if (!Role.class.isAssignableFrom(role)) throw new ClassCastException(String.format("%s does not implement Role", role.getName()));
-                if (!role.isInterface()) throw new ClassCastException(String.format("%s is not an interface", role.getName()));
-
-                final RoleSpec spec = role.getDeclaredAnnotation(RoleSpec.class);
-                if (spec == null) throw new ClassCastException(String.format("%s is not annotated with io.github.petals.role.RoleSpec", role.getName()));
-
-                T instance = (T) Proxy.newProxyInstance(
-                    role.getClassLoader(),
-                    new Class[] { role },
-                    (proxy, method, args) -> {
-                        switch (method.getName()) {
-                            case "player":
-                                return this;
-                            case "name":
-                                return spec.name();
-                            case "description":
-                                return spec.description();
-                        }
-
-                        final RoleMeta meta = method.getDeclaredAnnotation(RoleMeta.class);
-                        final String key = meta.value().isEmpty() ? method.getName() : meta.value();
-                        if (meta != null) {
-                            if (method.getParameterCount() == 0) {
-                                final Class<?> returnType = method.getReturnType();
-                                if (returnType == boolean.class) return this.meta().containsKey(key);
-                                else {
-                                    String value = this.meta().get(key);
-                                    if (returnType == String.class) return value;
-                                    if (Enum.class.isAssignableFrom(returnType)) return Enum.valueOf((Class<? extends Enum>) returnType, value);
-
-                                    value = value == null ? "0" : value;
-                                    if (returnType == byte.class) return Byte.valueOf(value);
-                                    if (returnType == short.class) return Short.valueOf(value);
-                                    if (returnType == int.class) return Integer.valueOf(value);
-                                    if (returnType == long.class) return Long.valueOf(value);
-                                    if (returnType == float.class) return Float.valueOf(value);
-                                    if (returnType == double.class) return Double.valueOf(value);
-                                }
-
-                                throw new ClassCastException(String.format("Cannot deserialize value %s with type %s", key, returnType.getName()));
-                            } else {
-                                final Class<?> param = method.getParameters()[0].getType();
-                                final String value = String.valueOf(args[0]);
-
-                                if (param == boolean.class) {
-                                    if (Boolean.parseBoolean(value)) this.meta().put(key, "1");
-                                    else this.meta().remove(key);
-                                } else if (param == Enum.class) this.meta().put(key, ((Enum<?>) args[0]).name());
-                                else this.meta().put(key, value);
-                            }
-                        }
-
-                        return null;
-                    }
-                );
-
-                this.role = instance;
-            } catch (ClassNotFoundException | ClassCastException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return this.role;
-    }
-
-    @Override
-    public <U extends Role> U role(Class<U> role) {
-        this.pooled.hset(this.uniqueId, "role", role.getName());
-        return (U) this.role();
+    public <U extends State<?>> U state(Class<U> state) {
+        this.pooled.hset(this.uniqueId, "state", state.getName());
+        return (U) this.state();
     }
 
     @Override
     public void delete() {
-        this.game().plugin().onRemovePlayer((Game.Player<Role>) this);
+        this.game().plugin().onRemovePlayer((State<Game.Player<?>>) this.state());
 
-        this.meta().clear();
+        State<?> state = this.state();
+        if (state != null) state.raw().clear();
 
         this.pooled.srem("players", this.uniqueId);
         this.pooled.del(this.uniqueId);

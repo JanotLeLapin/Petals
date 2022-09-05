@@ -12,7 +12,7 @@ public class PetalsScheduler extends PetalsBase implements Game.Scheduler {
     private final Plugin plugin;
     private final JedisPooled pooled;
 
-    public PetalsScheduler(PetalsGame game, JedisPooled pooled) {
+    public PetalsScheduler(PetalsGame<?> game, JedisPooled pooled) {
         super(game.uniqueId);
         this.plugin = game.plugin();
         this.pooled = pooled;

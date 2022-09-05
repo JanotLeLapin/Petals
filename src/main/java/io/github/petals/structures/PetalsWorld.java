@@ -25,8 +25,8 @@ public class PetalsWorld extends PetalsBase implements World {
     }
 
     @Override
-    public Game game() {
-        return new PetalsGame(pooled.hget("worlds", this.uniqueId), this.pooled);
+    public Game<?> game() {
+        return new PetalsGame<>(pooled.hget("worlds", this.uniqueId), this.pooled);
     }
 
     @Override

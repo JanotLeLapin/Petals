@@ -1,37 +1,32 @@
 package io.github.petals;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.scheduler.BukkitTask;
 
-import io.github.petals.role.Role;
+import io.github.petals.state.State;
 
 /** Reference to a game stored in the database */
-public interface Game {
+public interface Game<T extends State<?>> extends Base {
     /** Reference to a player stored in the database */
-    public static interface Player<T extends Role> {
-        /** @return the universally unique identifier of this player */
-        public String uniqueId();
+    public static interface Player<U extends State<?>> extends Base {
         /** @return whether this handle references a valid player in the database */
         public boolean exists();
         /** @return the game linked to this player */
-        public Game game();
+        public Game<? extends State<?>> game();
         /** @return the Bukkit representation of this player */
         public Optional<org.bukkit.entity.Player> player();
-        /** @return the custom metadata of this player */
-        public Map<String, String> meta();
-        /** @return the role for this player. If your games doesn't depend on roles this might be null */
-        public T role();
+        /** @return a state object, allows you to interact with this player's state */
+        public U state();
         /**
-         * Updates the role for this player
+         * Updates the state type for this player
          *
-         * @param <U> The new role type
-         * @param role The role class to link to this player
-         * @return An instance of the given role class
+         * @param <S> The new state type
+         * @param state The state class to link to this player
+         * @return An instance of the given state class
          */
-        public <U extends Role> U role(Class<U> role);
+        public <S extends State<?>> S state(Class<S> state);
         /** Removes the player from his game, then deletes him from the database */
         public void delete();
     }
@@ -43,7 +38,7 @@ public interface Game {
         /** @return whether this handle references a valid world in the database */
         public boolean exists();
         /** @return the game linked to this world */
-        public Game game();
+        public Game<?> game();
         /** @return the Bukkit representation of this world */
         public org.bukkit.World world();
         /** Removes the world from its game, then deletes it from the database */
@@ -84,8 +79,6 @@ public interface Game {
     public String uniqueId();
     /** @return whether this handle references a valid game in the database */
     public boolean exists();
-    /** @return the custom metadata of this game */
-    public Map<String, String> meta();
     /** @return whether the game has started yet */
     public boolean running();
     /** @return the amount of ticks that elapsed since the game started */
@@ -94,67 +87,77 @@ public interface Game {
     public Petal plugin();
     /** @return the {@link Scheduler} for this game */
     public Scheduler scheduler();
+    /** @return the {@link State} object for this game */
+    public T state();
+    /**
+     * Updates the {@link State} object for this game
+     *
+     * @param <U> The type of the new state
+     * @param state The new state class
+     * @return The new state
+     */
+    public <U extends State<?>> U state(Class<U> state);
     /** Deletes all players and worlds from the game then deletes the game */
     public void delete();
     // Players
     /** @return the player hosting this game */
-    public Player<Role> host();
+    public Player<? extends State<?>> host();
     /** @return every player in this game */
-    public Set<Player<Role>> players();
+    public Set<Player<? extends State<?>>> players();
     /**
-     * Finds each player stored in the database with given role
+     * Finds each player stored in the database with given state type
      *
-     * @param <T> The role type
-     * @param role The role class to match
+     * @param <U> The state type
+     * @param state The state class to match
      * @return A set of player handles
      */
-    public <T extends Role> Set<Player<T>> players(Class<T> role);
+    public <U extends State<?>> Set<Player<U>> players(Class<U> state);
     /**
      * Finds a player in this game from its ID
      *
      * @param uniqueId The player ID to lookup
      * @return The player handle
      */
-    public Optional<Player<Role>> player(String uniqueId);
+    public Optional<Player<State<?>>> player(String uniqueId);
     /**
      * Finds a player in this game from a Bukkit Player object
      *
      * @param player The Bukkit Player object
      * @return The player handle
      */
-    public Optional<Player<Role>> player(org.bukkit.entity.Player player);
+    public Optional<Player<State<?>>> player(org.bukkit.entity.Player player);
     /**
-     * Finds a player in this game from ID and role
+     * Finds a player in this game from ID and state type
      *
-     * @param <T> The role type
+     * @param <U> The state type
      * @param uniqueId The player ID to lookup
-     * @param role The role class to match
+     * @param state The state class to match
      * @return The player handle
      */
-    public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role);
+    public <U extends State<?>> Optional<Player<U>> player(String uniqueId, Class<U> state);
     /**
-     * Finds a player in this game from a Bukkit Player object and a role
+     * Finds a player in this game from a Bukkit Player object and a state type
      *
-     * @param <T> The role type
+     * @param <U> The state type
      * @param player The Bukkit Player object
-     * @param role The role class to match
+     * @param state The state class to match
      * @return The player handle
      */
-    public <T extends Role> Optional<Player<T>> player(org.bukkit.entity.Player player, Class<T> role);
+    public <U extends State<?>> Optional<Player<U>> player(org.bukkit.entity.Player player, Class<U> state);
     /**
      * Creates a player on the database and links it to this game
      *
      * @param uniqueId The player ID
      * @return The player handle
      */
-    public Player<Role> addPlayer(String uniqueId) throws IllegalStateException;
+    public Player<State<?>> addPlayer(String uniqueId) throws IllegalStateException;
     /**
      * Creates a player on the database and links it to this game
      *
      * @param player The Bukkit Player object
      * @return The player handle
      */
-    public Player<Role> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException;
+    public Player<State<?>> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException;
     // Worlds
     /** @return every world in this game */
     public Set<World> worlds();

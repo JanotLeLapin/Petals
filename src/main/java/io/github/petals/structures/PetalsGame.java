@@ -1,6 +1,5 @@
 package io.github.petals.structures;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,10 +11,11 @@ import io.github.petals.Metadata;
 import io.github.petals.Petal;
 import io.github.petals.PetalsPlugin;
 import io.github.petals.Util;
-import io.github.petals.role.Role;
+import io.github.petals.state.PetalsState;
+import io.github.petals.state.State;
 import redis.clients.jedis.JedisPooled;
 
-public class PetalsGame extends PetalsBase implements Game {
+public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T> {
     private final JedisPooled pooled;
 
     public PetalsGame(final String uniqueId, final JedisPooled pooled) {
@@ -31,11 +31,6 @@ public class PetalsGame extends PetalsBase implements Game {
     @Override
     public boolean exists() {
         return this.uniqueId == null ? false : pooled.sismember("games", this.uniqueId);
-    }
-
-    @Override
-    public Map<String, String> meta() {
-        return new Metadata(this.uniqueId + ":meta", this.pooled);
     }
 
     @Override
@@ -62,8 +57,22 @@ public class PetalsGame extends PetalsBase implements Game {
     }
 
     @Override
+    public T state() {
+        return (T) Util.createState(this, pooled);
+    }
+
+    @Override
+    public <U extends State<?>> U state(Class<U> state) {
+        this.pooled.hset(this.uniqueId, "state", state.getName());
+        return (U) this.state();
+    }
+
+    @Override
     public void delete() {
-        plugin().onDeleteGame(this);
+        plugin().onDeleteGame((State<Game<?>>) this.state());
+
+        State<?> state = this.state();
+        if (state != null) state.raw().clear();
 
         // Delete players
         this.players().forEach(player -> player.delete());
@@ -80,60 +89,60 @@ public class PetalsGame extends PetalsBase implements Game {
     }
 
     @Override
-    public Player<Role> host() {
-        return new PetalsPlayer<Role>(pooled.hget(this.uniqueId, "host"), pooled);
+    public Player<?> host() {
+        return new PetalsPlayer<State<?>>(pooled.hget(this.uniqueId, "host"), pooled);
     }
 
     @Override
-    public Set<Player<Role>> players() {
+    public Set<Player<?>> players() {
         Set<String> playerIds = pooled.smembers(this.uniqueId + ":players");
         return playerIds.stream().map(id -> this.player(id).get()).collect(Collectors.toSet());
     }
 
     @Override
-    public <T extends Role> Set<Player<T>> players(Class<T> role) {
+    public <U extends State<?>> Set<Player<U>> players(Class<U> state) {
         return pooled
             .smembers(this.uniqueId + ":players")
             .stream()
-            .filter(player -> Util.isRoleAssignable(player, role, pooled))
-            .map(id -> new PetalsPlayer<T>(id, pooled))
+            .filter(player -> Util.isStateAssignable(player, state, pooled))
+            .map(id -> new PetalsPlayer<U>(id, pooled))
             .collect(Collectors.toSet());
     }
 
     @Override
-    public Optional<Player<Role>> player(String uniqueId) {
-        PetalsPlayer<Role> p = new PetalsPlayer<>(uniqueId, pooled);
+    public Optional<Player<State<?>>> player(String uniqueId) {
+        PetalsPlayer<State<?>> p = new PetalsPlayer<>(uniqueId, pooled);
         return p.exists() && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
     }
 
     @Override
-    public Optional<Player<Role>> player(org.bukkit.entity.Player player) {
+    public Optional<Player<State<?>>> player(org.bukkit.entity.Player player) {
         return this.player(player.getUniqueId().toString());
     }
 
     @Override
-    public <T extends Role> Optional<Player<T>> player(String uniqueId, Class<T> role) {
-        PetalsPlayer<T> p = new PetalsPlayer<>(uniqueId, pooled);
+    public <U extends State<?>> Optional<Player<U>> player(String uniqueId, Class<U> role) {
+        PetalsPlayer<U> p = new PetalsPlayer<>(uniqueId, pooled);
         return
             p.exists()
-            && Util.isRoleAssignable(uniqueId, role, pooled)
+            && Util.isStateAssignable(uniqueId, role, pooled)
             && p.game().uniqueId().equals(this.uniqueId) ? Optional.of(p) : Optional.empty();
     }
 
     @Override
-    public <T extends Role> Optional<Player<T>> player(org.bukkit.entity.Player player, Class<T> role) {
+    public <U extends State<?>> Optional<Player<U>> player(org.bukkit.entity.Player player, Class<U> role) {
         return this.player(player.getUniqueId().toString(), role);
     }
 
     @Override
-    public Player<Role> addPlayer(String uniqueId) throws IllegalStateException {
-        Player<Role> p = PetalsPlugin.petals().database().createPlayer(uniqueId, this.uniqueId);
-        this.plugin().onAddPlayer(p);
+    public Player<State<?>> addPlayer(String uniqueId) throws IllegalStateException {
+        Player<State<?>> p = PetalsPlugin.petals().database().createPlayer(uniqueId, this.uniqueId);
+        this.plugin().onAddPlayer((State<Player<?>>) p.state());
         return p;
     }
 
     @Override
-    public Player<Role> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException {
+    public Player<State<?>> addPlayer(org.bukkit.entity.Player player) throws IllegalStateException {
         return this.addPlayer(player.getUniqueId().toString());
     }
 
@@ -155,7 +164,7 @@ public class PetalsGame extends PetalsBase implements Game {
 
     @Override
     public void start() {
-        this.plugin().onStartGame(this);
+        this.plugin().onStartGame((State<Game<?>>) this.state());
         pooled.hset(this.uniqueId(), "start", String.valueOf(Bukkit.getWorlds().get(0).getFullTime()));
     }
 }

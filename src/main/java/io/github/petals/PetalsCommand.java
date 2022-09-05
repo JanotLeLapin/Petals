@@ -31,7 +31,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equals("start") || args[0].equals("get") || args[0].equals("delete")) {
-            final Game game;
+            final Game<?> game;
             if (args.length < 2) {
                 game = Petals
                     .petals()
