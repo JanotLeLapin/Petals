@@ -1,17 +1,14 @@
 package io.github.petals.structures;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
-
 import io.github.petals.Game;
-import io.github.petals.Metadata;
 import io.github.petals.Petal;
 import io.github.petals.PetalsPlugin;
 import io.github.petals.Util;
-import io.github.petals.state.PetalsState;
 import io.github.petals.state.State;
 import redis.clients.jedis.JedisPooled;
 
@@ -39,16 +36,16 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
     }
 
     @Override
-    public long ticks() {
+    public long time() {
         return running()
-            ? Bukkit.getWorlds().get(0).getFullTime() - Long.parseLong(pooled.hget(this.uniqueId, "start"))
+            ? new Date().getTime() - Long.parseLong(pooled.hget(this.uniqueId, "start"))
             : -1;
     }
 
     @Override
     public Petal plugin() {
         String pluginName = pooled.hget(this.uniqueId, "plugin");
-        return (Petal) Bukkit.getPluginManager().getPlugin(pluginName);
+        return (Petal) org.bukkit.Bukkit.getPluginManager().getPlugin(pluginName);
     }
 
     @Override
@@ -165,7 +162,7 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
     @Override
     public void start() {
         this.plugin().onStartGame((State<Game<?>>) this.state());
-        pooled.hset(this.uniqueId(), "start", String.valueOf(Bukkit.getWorlds().get(0).getFullTime()));
+        pooled.hset(this.uniqueId(), "start", String.valueOf(new Date().getTime()));
     }
 }
 

@@ -60,7 +60,7 @@ public class PetalsCommand implements CommandExecutor, TabCompleter {
                         String.format("Game ID: %s", game.uniqueId()),
                         String.format("Player count: %d", game.players().size()),
                         String.format("Host: %s", game.host().player().map(host -> host.getName()).orElseGet(game.host()::uniqueId)),
-                        String.format("Seconds elapsed: %d", game.ticks() / 20),
+                        String.format("Seconds elapsed: %d", game.time() / 1000),
                         String.format("Plugin: %s", game.plugin().getName()),
                         String.format("Status: %s", game.running() ? "running" : "creating"),
                     });

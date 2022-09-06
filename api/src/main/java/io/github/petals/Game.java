@@ -81,8 +81,8 @@ public interface Game<T extends State<?>> extends Base {
     public boolean exists();
     /** @return whether the game has started yet */
     public boolean running();
-    /** @return the amount of ticks that elapsed since the game started */
-    public long ticks();
+    /** @return the amount of millis that elapsed since the game started */
+    public long time();
     /** @return the {@link Petal} plugin managing this game */
     public Petal plugin();
     /** @return the {@link Scheduler} for this game */
