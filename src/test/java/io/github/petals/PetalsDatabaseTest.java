@@ -3,6 +3,8 @@ package io.github.petals;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.*;
 
+import io.github.petals.state.State;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -16,12 +18,12 @@ public class PetalsDatabaseTest extends TestUtil {
         assertEquals(0, db.games().size());
 
         // Created a game -> one game
-        Game g1 = db.createGame("host1", plugin);
+        Game<State<?>> g1 = db.createGame("host1", plugin);
         assertEquals(1, db.games().size());
         assertEquals("host1", g1.host().uniqueId());
 
         // Created a game -> two games
-        Game g2 = db.createGame("host2", plugin);
+        Game<State<?>> g2 = db.createGame("host2", plugin);
         assertEquals(2, db.games().size());
         assertEquals("host2", g2.host().uniqueId());
         assertEquals("host1", g1.host().uniqueId());
@@ -37,24 +39,24 @@ public class PetalsDatabaseTest extends TestUtil {
     @Test
     public void duplicates() {
         // Same host for two games
-        Game g1 = db.createGame("host1", plugin);
+        Game<State<?>> g1 = db.createGame("host1", plugin);
         assertThrows(IllegalStateException.class, () -> db.createGame("host1", plugin));
         g1.delete();
         db.createGame("host1", plugin);
 
         // Add host to game
-        Game g2 = db.createGame("host2", plugin);
+        Game<State<?>> g2 = db.createGame("host2", plugin);
         assertThrows(IllegalStateException.class, () -> g2.addPlayer("host2"));
         g2.delete();
 
         // Add same player twice to game
-        Game g3 = db.createGame("host3", plugin);
+        Game<State<?>> g3 = db.createGame("host3", plugin);
         g3.addPlayer("player3");
         assertThrows(IllegalStateException.class, () -> g3.addPlayer("player3"));
 
         // Add same player to two games
-        Game g4a = db.createGame("host4a", plugin);
-        Game g4b = db.createGame("host4b", plugin);
+        Game<State<?>> g4a = db.createGame("host4a", plugin);
+        Game<State<?>> g4b = db.createGame("host4b", plugin);
         g4a.addPlayer("player4a");
         assertThrows(IllegalStateException.class, () -> g4b.addPlayer("player4a"));
     }
@@ -63,15 +65,15 @@ public class PetalsDatabaseTest extends TestUtil {
     public void customImplementation() {
         // Add metadata property to game host when created
         doAnswer(i ->
-            i.getArgument(0, Game.class).host().meta().put("foo", "bar")
+            ((Game<State<?>>) i.getArgument(0, State.class).owner()).host().state().raw().put("foo", "bar")
         ).when(plugin).onCreateGame(any());
-        Game g1 = petals.database().createGame("host1", plugin);
-        assertEquals("bar", g1.host().meta().get("foo"));
+        Game<State<?>> g1 = petals.database().createGame("host1", plugin);
+        assertEquals("bar", g1.host().state().raw().get("foo"));
 
         // Do nothing when game created
         doNothing().when(plugin).onCreateGame(any());
-        Game g2 = petals.database().createGame("host2", plugin);
-        assertNull(g2.host().meta().get("foo"));
+        Game<State<?>> g2 = petals.database().createGame("host2", plugin);
+        assertNull(g2.host().state().raw().get("foo"));
     }
 }
 
