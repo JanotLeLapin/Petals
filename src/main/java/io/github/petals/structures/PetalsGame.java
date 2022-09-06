@@ -21,11 +21,6 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
     }
 
     @Override
-    public String uniqueId() {
-        return this.uniqueId;
-    }
-
-    @Override
     public boolean exists() {
         return this.uniqueId == null ? false : pooled.sismember("games", this.uniqueId);
     }

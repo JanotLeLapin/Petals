@@ -7,9 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import io.github.petals.Game;
-import io.github.petals.Metadata;
 import io.github.petals.Util;
-import io.github.petals.state.PetalsState;
 import io.github.petals.state.State;
 import redis.clients.jedis.JedisPooled;
 
@@ -19,11 +17,6 @@ public class PetalsPlayer<T extends State<?>> extends PetalsBase implements Game
     public PetalsPlayer(final String uniqueId, JedisPooled pooled) {
         super(uniqueId);
         this.pooled = pooled;
-    }
-
-    @Override
-    public String uniqueId() {
-        return this.uniqueId;
     }
 
     @Override
