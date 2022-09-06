@@ -87,51 +87,42 @@ public class MyMainClass extends JavaPlugin implements Petal {
 }
 ```
 
-### Déclarer un rôle Petals
+### Déclarer un état Petals
 
-Avec Petals, les rôles sont des interfaces qui décrivent les métadonnées du joueur avec lequel elles sont associées. Petals les implémente, pas vous.
+Dans Petals, vous interagissez avec l'état d'un joueur ou d'une partie à travers une interface qui décrit les clés de l'état de l'objet. Vous écrivez une interface, et Petals l'implémente de manière dynamique.
 
-Voici un exemple de rôle avec Petals:
+Voici un exemple d'état avec Petals:
 
 ```java
-import io.github.petals.role.*;
+import io.github.petals.state.*;
 
-@RoleSpec(
-    name = "Mon Rôle",
-    description = "Un exemple de rôle"
-)
-public interface MyRole extends Role {
-    @RoleMeta
-    int blockBreakCount(); // Équivalent: Integer.parseInt(this.player().meta().getOrDefault("blockBreakCount", "0"))
-    @RoleMeta
-    void blockBreakCount(int blockBreakCount); // Équivalent: this.player().meta().put("blockBreakCount", String.valueOf(diamondCount))
+public interface MyState extends State {
+    @Getter("blockBreakCount") int getBlockBreakCount(); // Équivalent: Integer.parseInt(this.player().meta().getOrDefault("blockBreakCount", "0"))
+    @Setter("blockBreakCount") void setBlockBreakCount(int blockBreakCount); // Équivalent: this.player().meta().put("blockBreakCount", String.valueOf(blockBreakCount))
 }
 ```
 
-Petals rend les interactions avec les métadonnées du joueur moins risquées.
+Petals rend les interactions avec l'état d'un objet moins risquées.
 
 Gardez à l'esprit:
 
-- Vous ne devriez jamais créer une instance d'un Role.
-- Vous ne devriez jamais implémenter un Role.
-- Chaque méthode dans un Role devrait avoir une annotation.
-- L'annotation `RoleMeta` ne supporte que les types suivants pour l'instant: `String`, `byte`, `short`, `int`, `long`, `float`, `double`, `boolean`, `? extends Enum`
+- Vous ne devriez jamais créer une instance d'un State.
+- Vous ne devriez jamais implémenter un State.
+- Chaque méthode dans un State devrait avoir une annotation.
+- Les annotatons `Getter` et `Setter` ne supportent que les types suivants pour l'instant: `String`, `byte`, `short`, `int`, `long`, `float`, `double`, `boolean`, `? extends Enum`
 
-Maintenant qu'on a créé un Role, voyons comment on peut interagir avec à travers un Listener:
+Maintenant qu'on a écrit un état, voyons comment on peut interagir avec à travers un Listener:
 
 ```java
 public class MyListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         // Trouve un rôle qui hérite de MyRole
-        MyRole role = Petals.database().player(
-            e.getPlayer().getUniqueId().toString(),
-            MyRole.class
-        ).get();
+        MyState state = Petals.database().player(e.getPlayer(), MyState.class).get();
 
         // Augmente le compteur actuel d'une unité
-        int currentCount = role.blockBreakCount() + 1;
-        role.blockBreakCount(currentCount);
+        int currentCount = state.getBlockBreakCount() + 1;
+        state.setBlockBreakCount(currentCount);
 
         // Envoie un message au joueur
         e.getPlayer().sendMessage("Tu as cassé " + currentCount + " blocs! Bien joué!");
