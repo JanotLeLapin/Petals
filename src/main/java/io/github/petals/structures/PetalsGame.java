@@ -61,7 +61,11 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
 
     @Override
     public void delete() {
-        plugin().onDeleteGame((State<Game<?>>) this.state());
+        try {
+            plugin().onDeleteGame((State<Game<?>>) this.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
 
         State<?> state = this.state();
         if (state != null) state.raw().clear();
@@ -128,8 +132,12 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
 
     @Override
     public Player<State<?>> addPlayer(String uniqueId) throws IllegalStateException {
-        Player<State<?>> p = PetalsPlugin.petals().database().createPlayer(uniqueId, this.uniqueId);
-        this.plugin().onAddPlayer((State<Player<?>>) p.state());
+        Player<State<?>> p = PetalsPlugin.petals().database().createPlayer(uniqueId, this.uniqueId, plugin());
+        try {
+            this.plugin().onAddPlayer((State<Player<?>>) p.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return p;
     }
 
@@ -156,7 +164,11 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
 
     @Override
     public void start() {
-        this.plugin().onStartGame((State<Game<?>>) this.state());
+        try {
+            this.plugin().onStartGame((State<Game<?>>) this.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         pooled.hset(this.uniqueId(), "start", String.valueOf(new Date().getTime()));
     }
 }

@@ -21,7 +21,7 @@ public class PetalsBaseTest extends TestUtil {
         Player<?> p2 = db.player("foo").get();
         assertEquals(p1, p2);
 
-        Player<?> p3 = db.createPlayer("bar", game);
+        Player<?> p3 = db.createPlayer("bar", game, plugin);
         assertNotEquals(p1, p3);
     }
 }

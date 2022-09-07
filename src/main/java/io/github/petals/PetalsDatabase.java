@@ -77,9 +77,6 @@ public class PetalsDatabase implements Database {
     public Game<State<?>> createGame(String host, Petal plugin) throws IllegalStateException {
         String uniqueId = UUID.randomUUID().toString();
 
-        // Add player
-        Player<State<?>> p = createPlayer(host, uniqueId);
-
         // Create game
         HashMap<String, String> map = new HashMap<>();
         map.put("start", "-1");
@@ -87,10 +84,16 @@ public class PetalsDatabase implements Database {
         map.put("plugin", plugin.getName());
         pooled.hset(uniqueId, map);
         pooled.sadd("games", uniqueId);
-
         PetalsGame<State<?>> game = new PetalsGame<>(uniqueId, pooled);
-        plugin.onCreateGame((State<Game<?>>) game.state());
-        plugin.onAddPlayer((State<Player<?>>) p.state());
+
+        // Add player
+        createPlayer(host, uniqueId, plugin);
+
+        try {
+            plugin.onCreateGame((State<Game<?>>) game.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return game;
     }
 
@@ -105,7 +108,7 @@ public class PetalsDatabase implements Database {
         return new PetalsWorld(name, pooled);
     }
 
-    public Player<State<?>> createPlayer(String player, String game) throws IllegalStateException {
+    public Player<State<?>> createPlayer(String player, String game, Petal plugin) throws IllegalStateException {
         if (pooled.sismember("players", player)) {
             throw new IllegalStateException(String.format("Player with ID: \"%s\" already present", player));
         };
@@ -113,11 +116,18 @@ public class PetalsDatabase implements Database {
         HashMap<String, String> map = new HashMap<>();
         map.put("game", game);
         pooled.hset(player, map);
-
         pooled.sadd(game + ":players", player);
         pooled.sadd("players", player);
 
-        return new PetalsPlayer<>(player, pooled);
+        Player<State<?>> p = new PetalsPlayer<>(player, pooled);
+
+        try {
+            plugin.onAddPlayer((State<Player<?>>) p.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        return p;
     }
 
     public JedisPooled pooled() {

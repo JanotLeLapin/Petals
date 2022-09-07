@@ -48,7 +48,11 @@ public class PetalsPlayer<T extends State<?>> extends PetalsBase implements Game
 
     @Override
     public void delete() {
-        this.game().plugin().onRemovePlayer((State<Game.Player<?>>) this.state());
+        try {
+            this.game().plugin().onRemovePlayer((State<Game.Player<?>>) this.state());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
 
         State<?> state = this.state();
         if (state != null) state.raw().clear();
