@@ -45,7 +45,7 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
 
     @Override
     public Scheduler scheduler() {
-        return new PetalsScheduler(this, pooled);
+        return new PetalsScheduler();
     }
 
     @Override
