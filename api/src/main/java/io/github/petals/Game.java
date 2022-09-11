@@ -3,7 +3,7 @@ package io.github.petals;
 import java.util.Optional;
 import java.util.Set;
 
-import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import io.github.petals.state.State;
 
@@ -50,28 +50,26 @@ public interface Game<T extends State<?>> extends Base {
         /**
          * Schedules a given runnable
          *
-         * @param plugin The plugin
-         * @param delay The amount of millis to wait before running
+         * @param delay The amount of ticks to wait before running
          * @param runnable The runnable
-         * @return A Petals Task
+         * @return A Bukkit Task
          */
-        public long runTaskLater(Plugin plugin, long delay, Runnable runnable);
+        public BukkitTask runTaskLater(long delay, Runnable runnable);
         /**
          * Schedules a given runnable
          *
-         * @param plugin The plugin
-         * @param delay The amount of millis to wait before running
-         * @param period The amount of millis between each run
+         * @param delay The amount of ticks to wait before running
+         * @param period The amount of ticks between each run
          * @param runnable The runnable
-         * @return A Petals Task
+         * @return A Bukkit Task
          */
-        public long runTaskTimer(Plugin plugin, long delay, long period, Runnable runnable);
+        public BukkitTask runTaskTimer(long delay, long period, Runnable runnable);
         /**
          * Kills and removes a task associated with the given task ID
          *
          * @param taskId The task ID
          */
-        public void cancel(long taskId);
+        public void cancel(int taskId);
         /** Removes each task associated with this scheduler */
         public void clear();
     }

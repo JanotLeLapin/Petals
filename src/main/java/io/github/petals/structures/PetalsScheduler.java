@@ -1,99 +1,71 @@
 package io.github.petals.structures;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import io.github.petals.Game;
+import redis.clients.jedis.JedisPooled;
 
-public class PetalsScheduler implements Game.Scheduler {
-    private final Map<Long, PetalsTask> tasks = new HashMap<>();
+public class PetalsScheduler extends PetalsBase implements Game.Scheduler {
+    private final Plugin plugin;
+    private final JedisPooled pooled;
 
-    public static class PetalsTask implements Runnable {
-        private Thread t;
+    public PetalsScheduler(PetalsGame<?> game, JedisPooled pooled) {
+        super(game.uniqueId);
+        this.plugin = game.plugin();
+        this.pooled = pooled;
+    }
 
-        private final AtomicBoolean running = new AtomicBoolean(false);
-        private final Runnable runnable;
+    private void removeTask(int task) {
+        pooled.srem(uniqueId + ":tasks", String.valueOf(task));
+    }
 
-        private final long delay;
-        private final long interval;
-        private final Plugin plugin;
-        private final Game.Scheduler scheduler;
+    private void addTask(int task) {
+        pooled.sadd(uniqueId + ":tasks", String.valueOf(task));
+    }
 
-        public PetalsTask(Plugin plugin, Game.Scheduler scheduler, long delay, long interval, Runnable runnable) {
-            this.plugin = plugin;
-            this.scheduler = scheduler;
-            this.delay = delay;
-            this.interval = interval;
-            this.runnable = runnable;
-        }
-
-        public long start() {
-            this.t = new Thread(this);
-            this.t.start();
-
-            return this.t.getId();
-        }
-
-        public void cancel() {
-            this.running.set(false);
-        }
-
-        @Override
-        public void run() {
-            running.set(true);
-
-            try {
-                Thread.sleep(this.delay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
+    private BukkitRunnable createBukkitRunnable(Runnable runnable) {
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                removeTask(this.getTaskId());
+                Bukkit.getScheduler().runTask(plugin, runnable);
             }
-
-            do {
-                Bukkit.getScheduler().runTask(this.plugin, this.runnable);
-                try {
-                    Thread.sleep(this.interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
-            } while (this.running.get() && this.interval > 0);
-
-            this.scheduler.cancel(this.t.getId());
-        }
+        };
     }
 
     @Override
-    public long runTaskTimer(Plugin plugin, long delay, long period, Runnable runnable) {
-        PetalsTask task = new PetalsTask(plugin, this, delay, period, runnable);
-        long id = task.start();
-        this.tasks.put(id, task);
+    public BukkitTask runTaskLater(long delay, Runnable runnable) {
+        BukkitTask task = createBukkitRunnable(runnable).runTaskLaterAsynchronously(plugin, delay);
+        addTask(task.getTaskId());
 
-        return id;
+        return task;
     }
 
     @Override
-    public long runTaskLater(Plugin plugin, long delay, Runnable runnable) {
-        return this.runTaskTimer(plugin, delay, 0, runnable);
+    public BukkitTask runTaskTimer(long delay, long period, Runnable runnable) {
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, delay, period);
+        addTask(task.getTaskId());
+
+        return task;
     }
 
     @Override
-    public void cancel(long taskId) {
-        PetalsTask t = this.tasks.get(taskId);
-        if (t != null) {
-            t.cancel();
-            this.tasks.remove(taskId);
-        }
+    public void cancel(int taskId) {
+        Bukkit.getScheduler().cancelTask(taskId);
+        this.removeTask(taskId);
     }
 
     @Override
     public void clear() {
-        tasks.forEach((id, task) -> task.cancel());
-        tasks.clear();
+        pooled
+            .smembers(uniqueId + ":tasks")
+            .stream()
+            .forEach(id -> Bukkit.getScheduler().cancelTask(Integer.parseInt(id)));
+
+        pooled.del(uniqueId + ":tasks");
     }
 }
 
