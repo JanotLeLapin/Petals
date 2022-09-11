@@ -52,7 +52,7 @@ public interface Game<T extends State<?>> extends Base {
          *
          * @param delay The amount of ticks to wait before running
          * @param runnable The runnable
-         * @return A Bukkit task
+         * @return A Bukkit Task
          */
         public BukkitTask runTaskLater(long delay, Runnable runnable);
         /**
@@ -61,11 +61,11 @@ public interface Game<T extends State<?>> extends Base {
          * @param delay The amount of ticks to wait before running
          * @param period The amount of ticks between each run
          * @param runnable The runnable
-         * @return A Bukkit task
+         * @return A Bukkit Task
          */
         public BukkitTask runTaskTimer(long delay, long period, Runnable runnable);
         /**
-         * Removes a task associated with the given task ID
+         * Kills and removes a task associated with the given task ID
          *
          * @param taskId The task ID
          */
