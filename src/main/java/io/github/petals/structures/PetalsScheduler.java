@@ -31,14 +31,14 @@ public class PetalsScheduler extends PetalsBase implements Game.Scheduler {
             @Override
             public void run() {
                 removeTask(this.getTaskId());
-                runnable.run();
+                Bukkit.getScheduler().runTask(plugin, runnable);
             }
         };
     }
 
     @Override
     public BukkitTask runTaskLater(long delay, Runnable runnable) {
-        BukkitTask task = createBukkitRunnable(runnable).runTaskLater(plugin, delay);
+        BukkitTask task = createBukkitRunnable(runnable).runTaskLaterAsynchronously(plugin, delay);
         addTask(task.getTaskId());
 
         return task;
@@ -46,7 +46,7 @@ public class PetalsScheduler extends PetalsBase implements Game.Scheduler {
 
     @Override
     public BukkitTask runTaskTimer(long delay, long period, Runnable runnable) {
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, delay, period);
         addTask(task.getTaskId());
 
         return task;

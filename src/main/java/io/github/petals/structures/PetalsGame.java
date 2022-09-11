@@ -164,12 +164,12 @@ public class PetalsGame<T extends State<?>> extends PetalsBase implements Game<T
 
     @Override
     public void start() {
+        pooled.hset(this.uniqueId(), "start", String.valueOf(new Date().getTime()));
         try {
             this.plugin().onStartGame((State<Game<?>>) this.state());
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        pooled.hset(this.uniqueId(), "start", String.valueOf(new Date().getTime()));
     }
 }
 
