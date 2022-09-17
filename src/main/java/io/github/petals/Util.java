@@ -5,8 +5,10 @@ import io.github.petals.state.State;
 import redis.clients.jedis.JedisPooled;
 
 public class Util {
-    public static boolean isStateAssignable(String key, Class<? extends State> state, JedisPooled pooled) {
+    public static boolean isStateAssignable(String key, Class<? extends State<?>> state, JedisPooled pooled) {
         String roleName = pooled.hget(key, "state");
+        if (roleName == null) return false;
+
         try {
             Class<?> sc = Class.forName(roleName);
             return state.isAssignableFrom(sc);
