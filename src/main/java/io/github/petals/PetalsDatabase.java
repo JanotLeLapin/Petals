@@ -86,14 +86,15 @@ public class PetalsDatabase implements Database {
         pooled.sadd("games", uniqueId);
         PetalsGame<State<?>> game = new PetalsGame<>(uniqueId, pooled);
 
-        // Add player
-        createPlayer(host, uniqueId, plugin);
-
         try {
             plugin.onCreateGame((State<Game<?>>) game.state());
         } catch (Throwable e) {
             e.printStackTrace();
         }
+
+        // Add player
+        createPlayer(host, uniqueId, plugin);
+
         return game;
     }
 
