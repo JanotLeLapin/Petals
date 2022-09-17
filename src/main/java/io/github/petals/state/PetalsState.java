@@ -59,17 +59,20 @@ public class PetalsState implements InvocationHandler {
             final String key = setter.value();
             final Class<?> param = method.getParameters()[0].getType();
 
-            if (Enum.class.isAssignableFrom(param)) {
-                this.meta.put(key, ((Enum<?>) args[0]).name());
-                return null;
-            }
+            if (args[0] == null) this.meta.remove(key);
+            else {
+                if (Enum.class.isAssignableFrom(param)) {
+                    this.meta.put(key, ((Enum<?>) args[0]).name());
+                    return null;
+                }
 
-            final String value = String.valueOf(args[0]);
-            if (param == boolean.class) {
-                if (Boolean.parseBoolean(value)) this.meta.put(key, "1");
-                else this.meta.remove(key);
+                final String value = String.valueOf(args[0]);
+                if (param == boolean.class) {
+                    if (Boolean.parseBoolean(value)) this.meta.put(key, "1");
+                    else this.meta.remove(key);
+                }
+                else this.meta.put(key, value);
             }
-            else this.meta.put(key, value);
         }
 
         return null;
